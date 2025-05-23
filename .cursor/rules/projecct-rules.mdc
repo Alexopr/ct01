@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Project launch via Docker.
+- Redis caching.
+- Always respond in Russian
+- My operating system is Windows 11
+- Respond briefly.
+- The less code, the better.
+
+- Make sure you dont break anything during refactoring.
