@@ -2,6 +2,9 @@ package alg.coyote001.controller;
 
 import alg.coyote001.model.User;
 import alg.coyote001.service.UserService;
+import alg.coyote001.dto.UserDto;
+import alg.coyote001.dto.UserMapper;
+import alg.coyote001.dto.UserUpdateDto;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,23 +25,23 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers().stream().map(UserMapper::toDto).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(UserMapper.toDto(userService.getUserById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody User user) {
+        return new ResponseEntity<>(UserMapper.toDto(userService.createUser(user)), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @Valid @RequestBody User user) {
-        return ResponseEntity.ok(userService.updateUser(id, user));
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserUpdateDto dto) {
+        return ResponseEntity.ok(UserMapper.toDto(userService.updateUser(id, dto)));
     }
 
     @DeleteMapping("/{id}")
@@ -48,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(@RequestParam String keyword) {
-        return ResponseEntity.ok(userService.searchUsers(keyword));
+    public ResponseEntity<List<UserDto>> searchUsers(@RequestParam String keyword) {
+        return ResponseEntity.ok(userService.searchUsers(keyword).stream().map(UserMapper::toDto).toList());
     }
 } 

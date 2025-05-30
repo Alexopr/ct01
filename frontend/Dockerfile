@@ -4,6 +4,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# Устанавливаем переменные окружения для production build
+ENV VITE_API_URL=http://localhost:8080/api
+ENV VITE_TELEGRAM_BOT_NAME=alg_gor_bot
+
 RUN npm run build
 
 FROM nginx:alpine

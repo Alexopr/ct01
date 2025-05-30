@@ -16,20 +16,30 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     @Size(min = 3, max = 50)
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String username;
 
-    @NotBlank
     @Size(min = 6)
-    @Column(nullable = false)
+    @Column
     private String password;
 
-    @NotBlank
     @Email
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String email;
+
+    // Telegram-specific fields
+    @Column(name = "telegram_id", unique = true)
+    private Long telegramId;
+
+    @Column(name = "telegram_username")
+    private String telegramUsername;
+
+    @Column(name = "photo_url")
+    private String photoUrl;
+
+    @Column(name = "auth_date")
+    private Long authDate;
 
     @Column(name = "first_name")
     private String firstName;
@@ -45,8 +55,9 @@ public class User {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private Set<String> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
@@ -76,8 +87,18 @@ public class User {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-    public Set<String> getRoles() { return roles; }
-    public void setRoles(Set<String> roles) { this.roles = roles; }
+    public Set<Role> getRoles() { return roles; }
+    public void setRoles(Set<Role> roles) { this.roles = roles; }
+
+    // Telegram-specific getters and setters
+    public Long getTelegramId() { return telegramId; }
+    public void setTelegramId(Long telegramId) { this.telegramId = telegramId; }
+    public String getTelegramUsername() { return telegramUsername; }
+    public void setTelegramUsername(String telegramUsername) { this.telegramUsername = telegramUsername; }
+    public String getPhotoUrl() { return photoUrl; }
+    public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
+    public Long getAuthDate() { return authDate; }
+    public void setAuthDate(Long authDate) { this.authDate = authDate; }
 
     @Override
     public boolean equals(Object o) {
@@ -86,12 +107,13 @@ public class User {
         User user = (User) o;
         return Objects.equals(id, user.id) &&
                 Objects.equals(username, user.username) &&
-                Objects.equals(email, user.email);
+                Objects.equals(email, user.email) &&
+                Objects.equals(telegramId, user.telegramId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, username, email);
+        return Objects.hash(id, username, email, telegramId);
     }
 
     @Override

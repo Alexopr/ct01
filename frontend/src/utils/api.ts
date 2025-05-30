@@ -10,14 +10,47 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Add request interceptor for authentication
+// CSRF токен
+let csrfToken: string | null = null;
+
+// Функция для получения CSRF токена
+const fetchCsrfToken = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/auth/csrf`, {
+      withCredentials: true
+    });
+    csrfToken = response.data.token;
+    return csrfToken;
+  } catch (error) {
+    console.warn('Failed to fetch CSRF token:', error);
+    return null;
+  }
+};
+
+// Получаем CSRF токен при инициализации
+fetchCsrfToken();
+
+// Add request interceptor for authentication and CSRF
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // Добавляем токен аутентификации если есть
     const token = localStorage.getItem('token');
     if (token) {
       config.headers = config.headers || {};
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    
+    // Добавляем CSRF токен для POST, PUT, DELETE запросов
+    if (['post', 'put', 'delete', 'patch'].includes(config.method?.toLowerCase() || '')) {
+      if (!csrfToken) {
+        await fetchCsrfToken();
+      }
+      if (csrfToken) {
+        config.headers = config.headers || {};
+        config.headers['X-XSRF-TOKEN'] = csrfToken;
+      }
+    }
+    
     return config;
   },
   (error) => Promise.reject(error)
@@ -26,11 +59,21 @@ api.interceptors.request.use(
 // Add response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
     }
+    
+    // Если получили 403 (возможно проблема с CSRF), попробуем обновить токен
+    if (error.response && error.response.status === 403) {
+      await fetchCsrfToken();
+      // Повторяем запрос с новым токеном
+      if (csrfToken && error.config) {
+        error.config.headers['X-XSRF-TOKEN'] = csrfToken;
+        return api.request(error.config);
+      }
+    }
+    
     return Promise.reject(error);
   }
 );

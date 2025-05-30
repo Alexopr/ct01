@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createUser, updateUser, getUserById } from "../services/userService";
-import { Formik, Form, Field, ErrorMessage } from "formik";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import { Box, Paper, Typography, TextField, Button, Stack, Alert, Skeleton } from "@mui/material";
 
 const UserSchema = Yup.object().shape({
   username: Yup.string().required("Обязательное поле"),
@@ -62,35 +63,139 @@ const UserForm: React.FC = () => {
     setLoading(false);
   };
 
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
+  if (loading) return <Skeleton variant="rectangular" width="100%" height={320} sx={{ borderRadius: 4, mt: 4 }} />;
+  if (error) return <Alert severity="error" sx={{ mt: 4 }}>{error}</Alert>;
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h2 className="text-xl font-bold mb-4">{id ? "Редактировать" : "Создать"} пользователя</h2>
-      <Formik
-        initialValues={initialValues}
-        enableReinitialize
-        validationSchema={UserSchema}
-        onSubmit={handleSubmit}
-      >
-        <Form className="flex flex-col gap-2">
-          <label>Username<Field name="username" className="border p-2 rounded w-full" /></label>
-          <ErrorMessage name="username" component="div" className="text-red-600" />
-          <label>Email<Field name="email" className="border p-2 rounded w-full" /></label>
-          <ErrorMessage name="email" component="div" className="text-red-600" />
-          <label>First Name<Field name="firstName" className="border p-2 rounded w-full" /></label>
-          <ErrorMessage name="firstName" component="div" className="text-red-600" />
-          <label>Last Name<Field name="lastName" className="border p-2 rounded w-full" /></label>
-          <ErrorMessage name="lastName" component="div" className="text-red-600" />
-          <label>Roles (через запятую)<Field name="roles" className="border p-2 rounded w-full" /></label>
-          <ErrorMessage name="roles" component="div" className="text-red-600" />
-          <button type="submit" className="bg-blue-600 text-white p-2 rounded mt-2" disabled={loading}>
-            {loading ? "Сохранение..." : "Сохранить"}
-          </button>
-        </Form>
-      </Formik>
-    </div>
+    <Box
+      sx={{
+        minHeight: '80vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: 2,
+        py: 8,
+        background: 'linear-gradient(135deg, #23263a 0%, #2d314d 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        animation: 'fadeIn 1s',
+        '@keyframes fadeIn': {
+          '0%': { opacity: 0, transform: 'translateY(32px)' },
+          '100%': { opacity: 1, transform: 'none' },
+        },
+      }}
+    >
+      <Paper sx={{
+        bgcolor: 'rgba(35,38,58,0.7)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderRadius: 6,
+        boxShadow: '0 8px 40px 0 #6C47FF33, 0 2px 12px 0 #00E4FF22',
+        px: { xs: 2, sm: 6 },
+        py: { xs: 4, sm: 6 },
+        maxWidth: 500,
+        width: '100%',
+        textAlign: 'center',
+      }}>
+        <Typography variant="h4" fontWeight={800} sx={{ color: 'primary.main', letterSpacing: 1.2, mb: 3, textShadow: '0 2px 16px #6C47FF33' }}>
+          {id ? "Редактировать пользователя" : "Создать пользователя"}
+        </Typography>
+        <Formik
+          initialValues={initialValues}
+          enableReinitialize
+          validationSchema={UserSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ values, handleChange, handleBlur, touched, errors, isSubmitting }) => (
+            <Form>
+              <Stack spacing={3}>
+                <TextField
+                  label="Username"
+                  name="username"
+                  value={values.username}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.username && Boolean(errors.username)}
+                  helperText={touched.username && errors.username}
+                  fullWidth
+                  required
+                  sx={{ input: { color: '#fff' } }}
+                />
+                <TextField
+                  label="Email"
+                  name="email"
+                  value={values.email}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.email && Boolean(errors.email)}
+                  helperText={touched.email && errors.email}
+                  fullWidth
+                  required
+                  sx={{ input: { color: '#fff' } }}
+                />
+                <TextField
+                  label="First Name"
+                  name="firstName"
+                  value={values.firstName}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.firstName && Boolean(errors.firstName)}
+                  helperText={touched.firstName && errors.firstName}
+                  fullWidth
+                  sx={{ input: { color: '#fff' } }}
+                />
+                <TextField
+                  label="Last Name"
+                  name="lastName"
+                  value={values.lastName}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.lastName && Boolean(errors.lastName)}
+                  helperText={touched.lastName && errors.lastName}
+                  fullWidth
+                  sx={{ input: { color: '#fff' } }}
+                />
+                <TextField
+                  label="Роли (через запятую)"
+                  name="roles"
+                  value={values.roles}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.roles && Boolean(errors.roles)}
+                  helperText={touched.roles && errors.roles}
+                  fullWidth
+                  required
+                  sx={{ input: { color: '#fff' } }}
+                />
+                <Stack direction="row" spacing={2} justifyContent="flex-end" mt={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    disabled={isSubmitting}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: 18,
+                      borderRadius: 4,
+                      background: 'linear-gradient(135deg, #6C47FF 0%, #00E4FF 100%)',
+                      boxShadow: '0 4px 24px 0 #6C47FF33',
+                      transition: 'background 0.2s, box-shadow 0.2s',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #00E4FF 0%, #6C47FF 100%)',
+                        boxShadow: '0 8px 32px 0 #00E4FF33',
+                      },
+                    }}
+                  >
+                    {id ? "Сохранить" : "Создать"}
+                  </Button>
+                  <Button variant="outlined" color="secondary" onClick={() => navigate("/users")}>Отмена</Button>
+                </Stack>
+              </Stack>
+            </Form>
+          )}
+        </Formik>
+      </Paper>
+    </Box>
   );
 };
 

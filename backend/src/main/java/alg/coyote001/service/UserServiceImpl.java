@@ -13,6 +13,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import alg.coyote001.exception.ResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import alg.coyote001.dto.UserUpdateDto;
+import alg.coyote001.model.Role;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,17 +66,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @CachePut(value = "users", key = "#id")
-    public User updateUser(Long id, User user) {
-        validate(user);
+    public User updateUser(Long id, UserUpdateDto dto) {
         User existing = getUserById(id);
-        if (!existing.getUsername().equals(user.getUsername()) && userRepository.existsByUsername(user.getUsername())) {
+        if (dto.getUsername() != null && !existing.getUsername().equals(dto.getUsername()) && userRepository.existsByUsername(dto.getUsername())) {
             throw new DataIntegrityViolationException("Username already exists");
         }
-        if (!existing.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(user.getEmail())) {
+        if (dto.getEmail() != null && !existing.getEmail().equals(dto.getEmail()) && userRepository.existsByEmail(dto.getEmail())) {
             throw new DataIntegrityViolationException("Email already exists");
         }
-        user.setId(id);
-        return userRepository.save(user);
+        if (dto.getUsername() != null) existing.setUsername(dto.getUsername());
+        if (dto.getEmail() != null) existing.setEmail(dto.getEmail());
+        if (dto.getRoles() != null) existing.setRoles(dto.getRoles().stream().map(Role::valueOf).collect(java.util.stream.Collectors.toSet()));
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            existing.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        validate(existing);
+        return userRepository.save(existing);
     }
 
     @Override

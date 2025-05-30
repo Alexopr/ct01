@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { getUsers, deleteUser } from "../services/userService";
 import type { User } from "../services/userService";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import type { GridColDef, GridActionsColDef } from "@mui/x-data-grid";
+import { Box, Paper, Typography, Button, Stack, Alert, Skeleton } from "@mui/material";
 
 const UserList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -30,46 +34,124 @@ const UserList: React.FC = () => {
       await deleteUser(id);
       setUsers(users.filter(u => u.id !== id));
     } catch (e: any) {
-      alert(e.message || "Ошибка удаления");
+      setError(e.message || "Ошибка удаления");
     }
   };
 
-  if (loading) return <div>Загрузка...</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
+  const columns: (GridColDef | GridActionsColDef)[] = [
+    { field: "id", headerName: "ID", width: 70 },
+    { field: "username", headerName: "Username", width: 150 },
+    { field: "email", headerName: "Email", width: 200 },
+    { field: "roles", headerName: "Роли", width: 180, valueGetter: (params: any) => (params.row?.roles ? params.row.roles.join(", ") : "") },
+    {
+      field: "actions",
+      type: 'actions',
+      headerName: "Действия",
+      width: 160,
+      getActions: (params: any) => [
+        <GridActionsCellItem label="Просмотр" onClick={() => navigate(`/users/${params.row.id}`)} showInMenu />,
+        <GridActionsCellItem label="Редактировать" onClick={() => navigate(`/users/${params.row.id}/edit`)} showInMenu />,
+        <GridActionsCellItem label="Удалить" onClick={() => handleDelete(params.row.id)} showInMenu />,
+      ],
+    },
+  ];
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-bold">Пользователи</h2>
-        <Link to="/users/new" className="bg-green-600 text-white px-4 py-2 rounded">Добавить</Link>
-      </div>
-      <table className="min-w-full border">
-        <thead>
-          <tr>
-            <th className="border px-2">ID</th>
-            <th className="border px-2">Username</th>
-            <th className="border px-2">Email</th>
-            <th className="border px-2">Роли</th>
-            <th className="border px-2">Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(user => (
-            <tr key={user.id}>
-              <td className="border px-2">{user.id}</td>
-              <td className="border px-2">{user.username}</td>
-              <td className="border px-2">{user.email}</td>
-              <td className="border px-2">{user.roles.join(", ")}</td>
-              <td className="border px-2 flex gap-2">
-                <Link to={`/users/${user.id}`} className="text-blue-600">Просмотр</Link>
-                <Link to={`/users/${user.id}/edit`} className="text-yellow-600">Редактировать</Link>
-                <button onClick={() => handleDelete(user.id)} className="text-red-600">Удалить</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', px: 2 }}>
+      <Paper sx={{
+        p: { xs: 2, sm: 4 },
+        borderRadius: 6,
+        boxShadow: '0 8px 40px 0 #6C47FF33, 0 2px 12px 0 #00E4FF22',
+        bgcolor: 'rgba(35,38,58,0.7)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        width: '100%',
+        maxWidth: 1100,
+        animation: 'fadeIn 1s',
+        '@keyframes fadeIn': {
+          '0%': { opacity: 0, transform: 'translateY(32px)' },
+          '100%': { opacity: 1, transform: 'none' },
+        },
+      }}>
+        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} mb={2} gap={2}>
+          <Typography variant="h5" fontWeight={900} sx={{ color: 'primary.main', letterSpacing: 1.2, textShadow: '0 2px 16px #6C47FF33' }}>Пользователи</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            component={Link}
+            to="/users/new"
+            sx={{
+              fontWeight: 700,
+              fontSize: 18,
+              borderRadius: 4,
+              background: 'linear-gradient(135deg, #6C47FF 0%, #00E4FF 100%)',
+              boxShadow: '0 4px 24px 0 #6C47FF33',
+              transition: 'background 0.2s, box-shadow 0.2s',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #00E4FF 0%, #6C47FF 100%)',
+                boxShadow: '0 8px 32px 0 #00E4FF33',
+              },
+            }}
+          >
+            Добавить
+          </Button>
+        </Stack>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {loading ? (
+          <Skeleton variant="rectangular" width="100%" height={400} sx={{ borderRadius: 3 }} />
+        ) : (
+          <DataGrid
+            rows={users}
+            columns={columns}
+            autoHeight
+            pageSizeOptions={[10, 20, 50]}
+            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+            sx={{
+              borderRadius: 3,
+              bgcolor: 'rgba(35,38,58,0.5)',
+              color: '#fff',
+              minHeight: 320,
+              fontSize: 16,
+              boxShadow: '0 4px 24px 0 #6C47FF33',
+              '& .MuiDataGrid-row': {
+                transition: 'background 0.2s',
+                '&:hover': {
+                  background: 'rgba(108,71,255,0.08)',
+                },
+              },
+              '& .MuiDataGrid-columnHeaders': {
+                bgcolor: 'rgba(35,38,58,0.8)',
+                color: 'primary.main',
+                fontWeight: 800,
+                fontSize: 18,
+                borderBottom: '1px solid #6C47FF33',
+              },
+              '& .MuiDataGrid-footerContainer': {
+                bgcolor: 'rgba(35,38,58,0.8)',
+                borderTop: '1px solid #6C47FF33',
+              },
+              '& .MuiDataGrid-cell': {
+                borderBottom: '1px solid #6C47FF22',
+              },
+              '& .MuiDataGrid-virtualScroller': {
+                scrollbarColor: '#6C47FF #23263a',
+                '&::-webkit-scrollbar': {
+                  height: 8,
+                  width: 8,
+                  background: '#23263a',
+                  borderRadius: 4,
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'linear-gradient(135deg, #6C47FF 0%, #00E4FF 100%)',
+                  borderRadius: 4,
+                },
+              },
+            }}
+            disableRowSelectionOnClick
+          />
+        )}
+      </Paper>
+    </Box>
   );
 };
 
