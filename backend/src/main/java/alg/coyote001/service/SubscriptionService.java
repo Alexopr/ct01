@@ -7,6 +7,9 @@ import alg.coyote001.entity.User;
 import alg.coyote001.entity.UserSubscription;
 import alg.coyote001.entity.UserSubscription.PlanType;
 import alg.coyote001.entity.UserSubscription.SubscriptionStatus;
+import alg.coyote001.event.SubscriptionCancelledEvent;
+import alg.coyote001.event.SubscriptionExpiredEvent;
+import alg.coyote001.event.SubscriptionUpgradedEvent;
 import alg.coyote001.repository.UserRepository;
 import alg.coyote001.repository.UserSubscriptionRepository;
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,14 +38,17 @@ public class SubscriptionService {
     private final UserSubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
     private final SubscriptionLimitsConfiguration subscriptionConfig;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public SubscriptionService(UserSubscriptionRepository subscriptionRepository,
                                UserRepository userRepository,
-                               SubscriptionLimitsConfiguration subscriptionConfig) {
+                               SubscriptionLimitsConfiguration subscriptionConfig,
+                               ApplicationEventPublisher eventPublisher) {
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
         this.subscriptionConfig = subscriptionConfig;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -114,6 +121,13 @@ public class SubscriptionService {
 
         UserSubscription savedSubscription = subscriptionRepository.save(subscription);
         
+        // Publish subscription upgrade event if not FREE plan
+        if (planType != PlanType.FREE) {
+            String previousPlan = currentSubscription.map(s -> s.getPlanType().name()).orElse("FREE");
+            eventPublisher.publishEvent(new SubscriptionUpgradedEvent(
+                    this, userId, planType.name(), previousPlan));
+        }
+        
         logger.info("Создана новая подписка {} для пользователя {}", planType, userId);
         return savedSubscription;
     }
@@ -169,6 +183,9 @@ public class SubscriptionService {
         
         logger.info("Отменена подписка {} для пользователя {}. Причина: {}", 
                    subscriptionId, subscription.getUser().getId(), reason);
+        
+        eventPublisher.publishEvent(new SubscriptionCancelledEvent(
+                this, subscription.getUser().getId(), subscription.getPlanType().name()));
         
         return cancelledSubscription;
     }

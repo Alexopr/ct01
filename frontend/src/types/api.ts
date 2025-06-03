@@ -294,4 +294,68 @@ export interface SystemNotification {
   message: string;
   timestamp: string;
   read: boolean;
+}
+
+// Subscription Types
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string;
+  price: number;
+  currency: string;
+  billingCycle: 'MONTHLY' | 'YEARLY';
+  features: string[];
+  limits: Record<string, number>;
+  isRecommended?: boolean;
+  trialDays?: number;
+}
+
+export interface SubscriptionStatusDto {
+  id: number;
+  userId: number;
+  planId: string;
+  planName: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'CANCELLED' | 'EXPIRED';
+  active: boolean;
+  autoRenewal: boolean;
+  startDate: string;
+  endDate?: string;
+  trialActive: boolean;
+  trialEndDate?: string;
+  nextBillingDate?: string;
+  paymentHistory: PaymentRecord[];
+}
+
+export interface UsageLimitDto {
+  resourceType: string;
+  limit: number; // -1 for unlimited
+  used: number;
+  resetPeriod: 'DAILY' | 'WEEKLY' | 'MONTHLY';
+  nextReset: string;
+}
+
+export interface SubscriptionUpgradeRequest {
+  planId: string;
+  billingCycle: 'MONTHLY' | 'YEARLY';
+  autoRenewal?: boolean;
+  paymentMethod?: string;
+  promoCode?: string;
+}
+
+export interface PaymentRecord {
+  id: number;
+  amount: number;
+  currency: string;
+  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+  paymentDate: string;
+  description: string;
+  transactionId?: string;
+}
+
+export interface SubscriptionFeatureMatrix {
+  [feature: string]: {
+    free: string | number | boolean;
+    premium: string | number | boolean;
+  };
 } 

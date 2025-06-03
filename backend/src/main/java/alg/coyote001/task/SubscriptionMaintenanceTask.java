@@ -3,11 +3,13 @@ package alg.coyote001.task;
 import alg.coyote001.entity.SubscriptionUsage.ResetPeriod;
 import alg.coyote001.entity.UserSubscription;
 import alg.coyote001.entity.UserSubscription.SubscriptionStatus;
+import alg.coyote001.event.SubscriptionExpiredEvent;
 import alg.coyote001.service.SubscriptionLimitService;
 import alg.coyote001.service.SubscriptionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,12 +27,15 @@ public class SubscriptionMaintenanceTask {
 
     private final SubscriptionService subscriptionService;
     private final SubscriptionLimitService limitService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public SubscriptionMaintenanceTask(SubscriptionService subscriptionService,
-                                       SubscriptionLimitService limitService) {
+                                       SubscriptionLimitService limitService,
+                                       ApplicationEventPublisher eventPublisher) {
         this.subscriptionService = subscriptionService;
         this.limitService = limitService;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -55,6 +60,10 @@ public class SubscriptionMaintenanceTask {
                     subscription.setStatus(SubscriptionStatus.GRACE_PERIOD);
                     logger.info("Подписка {} переведена в grace period", subscription.getId());
                 }
+                
+                // Publish subscription expired event
+                eventPublisher.publishEvent(new SubscriptionExpiredEvent(
+                        this, subscription.getUser().getId(), subscription.getPlanType().name()));
             }
             
             logger.info("Обработано {} истекших подписок", expiredSubscriptions.size());

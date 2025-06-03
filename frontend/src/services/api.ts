@@ -19,7 +19,12 @@ import type {
   UserStatistics,
   CoinStatistics,
   SystemStatistics,
-  ApiError
+  ApiError,
+  SubscriptionPlan,
+  SubscriptionStatusDto,
+  UsageLimitDto,
+  SubscriptionUpgradeRequest,
+  SubscriptionFeatureMatrix
 } from '../types/api';
 
 // API Configuration
@@ -304,10 +309,46 @@ class ApiService {
     return this.get<SystemStatistics>('/v1/system/statistics');
   }
 
-  async getHealthCheck(): Promise<Record<string, any>> {
-    return this.get<Record<string, any>>('/actuator/health');
+  // Subscription Management API
+  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    return this.get<SubscriptionPlan[]>('/v1/subscriptions/plans');
+  }
+
+  async getSubscriptionStatus(): Promise<SubscriptionStatusDto> {
+    return this.get<SubscriptionStatusDto>('/v1/subscriptions/status');
+  }
+
+  async getSubscriptionLimits(): Promise<UsageLimitDto[]> {
+    return this.get<UsageLimitDto[]>('/v1/subscriptions/limits');
+  }
+
+  async upgradeSubscription(request: SubscriptionUpgradeRequest): Promise<SubscriptionStatusDto> {
+    return this.post<SubscriptionStatusDto>('/v1/subscriptions/upgrade', request);
+  }
+
+  async cancelSubscription(): Promise<SubscriptionStatusDto> {
+    return this.post<SubscriptionStatusDto>('/v1/subscriptions/cancel');
+  }
+
+  async checkResourceLimit(resourceType: string): Promise<boolean> {
+    return this.get<boolean>(`/v1/subscriptions/check-limit/${resourceType}`);
+  }
+
+  async getSubscriptionFeatureMatrix(): Promise<SubscriptionFeatureMatrix> {
+    return this.get<SubscriptionFeatureMatrix>('/v1/subscriptions/features');
   }
 }
+
+// Export subscription API methods
+export const subscriptionApi = {
+  getPlans: () => apiService.getSubscriptionPlans(),
+  getStatus: () => apiService.getSubscriptionStatus(),
+  getLimits: () => apiService.getSubscriptionLimits(),
+  upgrade: (request: SubscriptionUpgradeRequest) => apiService.upgradeSubscription(request),
+  cancel: () => apiService.cancelSubscription(),
+  checkLimit: (resourceType: string) => apiService.checkResourceLimit(resourceType),
+  getFeatureMatrix: () => apiService.getSubscriptionFeatureMatrix()
+};
 
 // Export singleton instance
 export const apiService = new ApiService();

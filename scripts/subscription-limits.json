@@ -1,0 +1,200 @@
+{
+  "plans": {
+    "FREE": {
+      "name": "FREE",
+      "displayName": "Бесплатный",
+      "description": "Базовый функционал для знакомства с системой",
+      "price": 0,
+      "currency": "USD",
+      "billingCycle": "monthly",
+      "trialDays": 0,
+      "features": [
+        "Базовое отслеживание криптовалют",
+        "До 5 уведомлений в день",
+        "Основная статистика портфеля",
+        "Техническая поддержка по email"
+      ],
+      "limits": {
+        "twitterTracker": {
+          "maxTrackedAccounts": 3,
+          "maxTweetsPerDay": 100,
+          "maxKeywords": 2,
+          "sentimentAnalysis": false,
+          "resetPeriod": "daily"
+        },
+        "telegramTracker": {
+          "maxTrackedChannels": 2,
+          "maxMessagesPerDay": 50,
+          "maxKeywords": 2,
+          "resetPeriod": "daily"
+        },
+        "marketAnalytics": {
+          "maxWatchlistItems": 10,
+          "maxPortfolioItems": 5,
+          "advancedCharts": false,
+          "customIndicators": 0,
+          "resetPeriod": "monthly"
+        },
+        "smartMoney": {
+          "maxWallets": 0,
+          "maxTransactionsPerDay": 0,
+          "whaleAlerts": false,
+          "resetPeriod": "daily"
+        },
+        "notifications": {
+          "maxNotificationsPerDay": 5,
+          "emailNotifications": true,
+          "telegramNotifications": false,
+          "webhookNotifications": false,
+          "resetPeriod": "daily"
+        },
+        "api": {
+          "maxRequestsPerHour": 100,
+          "maxRequestsPerDay": 1000,
+          "rateLimitBypass": false,
+          "resetPeriod": "hourly"
+        }
+      }
+    },
+    "PREMIUM": {
+      "name": "PREMIUM",
+      "displayName": "Премиум",
+      "description": "Расширенный функционал для профессиональных трейдеров",
+      "price": 9.99,
+      "currency": "USD",
+      "billingCycle": "monthly",
+      "trialDays": 7,
+      "features": [
+        "Безлимитное отслеживание Twitter и Telegram",
+        "Продвинутая аналитика и индикаторы",
+        "Smart Money трекинг",
+        "Безлимитные уведомления",
+        "API доступ без ограничений",
+        "Приоритетная техническая поддержка",
+        "Экспорт данных в Excel/CSV",
+        "Кастомные алерты и автоматизация"
+      ],
+      "limits": {
+        "twitterTracker": {
+          "maxTrackedAccounts": -1,
+          "maxTweetsPerDay": -1,
+          "maxKeywords": -1,
+          "sentimentAnalysis": true,
+          "resetPeriod": "daily"
+        },
+        "telegramTracker": {
+          "maxTrackedChannels": -1,
+          "maxMessagesPerDay": -1,
+          "maxKeywords": -1,
+          "resetPeriod": "daily"
+        },
+        "marketAnalytics": {
+          "maxWatchlistItems": -1,
+          "maxPortfolioItems": -1,
+          "advancedCharts": true,
+          "customIndicators": -1,
+          "resetPeriod": "monthly"
+        },
+        "smartMoney": {
+          "maxWallets": -1,
+          "maxTransactionsPerDay": -1,
+          "whaleAlerts": true,
+          "resetPeriod": "daily"
+        },
+        "notifications": {
+          "maxNotificationsPerDay": -1,
+          "emailNotifications": true,
+          "telegramNotifications": true,
+          "webhookNotifications": true,
+          "resetPeriod": "daily"
+        },
+        "api": {
+          "maxRequestsPerHour": -1,
+          "maxRequestsPerDay": -1,
+          "rateLimitBypass": true,
+          "resetPeriod": "hourly"
+        }
+      }
+    }
+  },
+  "paymentSettings": {
+    "providers": ["stripe", "paypal", "crypto"],
+    "currencies": ["USD", "EUR", "BTC", "ETH"],
+    "billingCycles": ["monthly", "yearly"],
+    "discounts": {
+      "yearly": 20
+    }
+  },
+  "upgradePrompts": {
+    "enabled": true,
+    "showAfterLimitReached": true,
+    "showOnFeatureAccess": true,
+    "delayBetweenPrompts": 24,
+    "maxPromptsPerDay": 3
+  },
+  "notificationSettings": {
+    "limitWarnings": {
+      "enabled": true,
+      "thresholds": [75, 90, 95],
+      "channels": ["email", "telegram"]
+    },
+    "subscriptionReminders": {
+      "enabled": true,
+      "daysBefore": [7, 3, 1],
+      "channels": ["email", "telegram"]
+    }
+  },
+  "systemSettings": {
+    "defaultPlan": "FREE",
+    "trialEnabled": true,
+    "autoRenewal": true,
+    "gracePeriodDays": 3,
+    "maxActiveSubscriptions": 1,
+    "allowDowngrades": true,
+    "prorationEnabled": true
+  },
+  "moduleAvailability": {
+    "twitterTracker": {
+      "FREE": true,
+      "PREMIUM": true
+    },
+    "telegramTracker": {
+      "FREE": true,
+      "PREMIUM": true
+    },
+    "marketAnalytics": {
+      "FREE": true,
+      "PREMIUM": true
+    },
+    "smartMoney": {
+      "FREE": false,
+      "PREMIUM": true
+    },
+    "advancedReports": {
+      "FREE": false,
+      "PREMIUM": true
+    },
+    "customAlerts": {
+      "FREE": false,
+      "PREMIUM": true
+    },
+    "apiAccess": {
+      "FREE": true,
+      "PREMIUM": true
+    },
+    "dataExport": {
+      "FREE": false,
+      "PREMIUM": true
+    },
+    "prioritySupport": {
+      "FREE": false,
+      "PREMIUM": true
+    }
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "lastUpdated": "2024-01-15T10:00:00Z",
+    "description": "Конфигурация лимитов и планов подписки для Crypto Admin Dashboard",
+    "environment": "production"
+  }
+} 
