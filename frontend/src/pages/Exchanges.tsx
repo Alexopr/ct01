@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, Button, Input } from "../components/ui";
-import { Link } from "@heroui/react";
+import { Link } from "@nextui-org/react";
 import { Icon } from '@iconify/react';
 
 // Список бирж с дополнительной информацией
@@ -181,8 +181,7 @@ const Exchanges: React.FC = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               variant="bordered"
-              glassmorphism
-              leftIcon="solar:magnifer-zoom-in-bold"
+              startContent={<Icon icon="solar:magnifer-zoom-in-bold" className="w-4 h-4" />}
               className="w-full"
             />
           </div>
@@ -192,9 +191,10 @@ const Exchanges: React.FC = () => {
             {categories.map((category) => (
               <Button
                 key={category.key}
-                variant={selectedCategory === category.key ? "primary" : "ghost"}
+                variant={selectedCategory === category.key ? "solid" : "ghost"}
+                color={selectedCategory === category.key ? "primary" : "default"}
                 size="md"
-                icon={category.icon}
+                startContent={<Icon icon={category.icon} className="w-4 h-4" />}
                 onClick={() => setSelectedCategory(category.key)}
                 className={`transition-all duration-300 ${
                   selectedCategory === category.key 
@@ -217,10 +217,7 @@ const Exchanges: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredExchanges.map((exchange, index) => (
             <Card
-              key={exchange.name}
-              variant="glass"
-              hoverable
-              className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 animate-in fade-in-0 slide-in-from-bottom-4"
+              key={exchange.name} className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 animate-in fade-in-0 slide-in-from-bottom-4"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="p-6 space-y-4">
@@ -288,10 +285,8 @@ const Exchanges: React.FC = () => {
                   className="block"
                 >
                   <Button
-                    variant="primary"
-                    size="md"
-                    gradient
-                    icon="solar:export-bold"
+                    color="primary"
+                    size="md" startContent={<Icon icon="solar:export-bold" className="w-4 h-4" />}
                     className="w-full transition-all duration-300 hover:shadow-lg"
                   >
                     Перейти на биржу
@@ -318,7 +313,7 @@ const Exchanges: React.FC = () => {
         {/* Info Section */}
         <div className="pt-8">
           <Card
-            variant="glass"
+            
             className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-bottom-4 duration-700"
             style={{ animationDelay: '600ms' }}
           >
@@ -336,10 +331,8 @@ const Exchanges: React.FC = () => {
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
-                  variant="primary"
-                  size="lg"
-                  gradient
-                  icon="solar:info-circle-bold"
+                  color="primary"
+                  size="lg" startContent={<Icon icon="solar:info-circle-bold" className="w-4 h-4" />}
                   className="px-8"
                 >
                   Руководство по выбору биржи
@@ -347,7 +340,7 @@ const Exchanges: React.FC = () => {
                 <Button
                   variant="ghost"
                   size="lg"
-                  icon="solar:shield-check-bold"
+                  startContent={<Icon icon="solar:shield-check-bold" className="w-4 h-4" />}
                   className="px-8 border border-divider/30 hover:border-primary/50"
                 >
                   Безопасность торговли
@@ -362,3 +355,6 @@ const Exchanges: React.FC = () => {
 };
 
 export default Exchanges; 
+
+
+

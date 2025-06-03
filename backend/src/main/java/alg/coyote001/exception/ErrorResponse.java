@@ -1,27 +1,74 @@
 package alg.coyote001.exception;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 import java.util.Map;
 
+/**
+ * Стандартный ответ об ошибке для API
+ */
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ErrorResponse {
-    private String code;
+    
+    /**
+     * Временная метка ошибки
+     */
+    private LocalDateTime timestamp;
+    
+    /**
+     * HTTP статус код
+     */
+    private int status;
+    
+    /**
+     * Тип ошибки
+     */
+    private String error;
+    
+    /**
+     * Сообщение об ошибке
+     */
     private String message;
-    private Map<String, String> details;
-
-    public ErrorResponse(String code, String message) {
-        this.code = code;
-        this.message = message;
+    
+    /**
+     * Дополнительные детали (например, поля валидации)
+     */
+    private Map<String, Object> details;
+    
+    /**
+     * Путь запроса где произошла ошибка
+     */
+    private String path;
+    
+    /**
+     * Создать простой ответ об ошибке
+     */
+    public static ErrorResponse of(int status, String error, String message) {
+        return ErrorResponse.builder()
+            .timestamp(LocalDateTime.now())
+            .status(status)
+            .error(error)
+            .message(message)
+            .build();
     }
-
-    public ErrorResponse(String code, String message, Map<String, String> details) {
-        this.code = code;
-        this.message = message;
-        this.details = details;
+    
+    /**
+     * Создать ответ об ошибке с деталями
+     */
+    public static ErrorResponse of(int status, String error, String message, Map<String, Object> details) {
+        return ErrorResponse.builder()
+            .timestamp(LocalDateTime.now())
+            .status(status)
+            .error(error)
+            .message(message)
+            .details(details)
+            .build();
     }
-
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-    public Map<String, String> getDetails() { return details; }
-    public void setDetails(Map<String, String> details) { this.details = details; }
 } 

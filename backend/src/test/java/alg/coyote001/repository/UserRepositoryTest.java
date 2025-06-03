@@ -1,6 +1,6 @@
 package alg.coyote001.repository;
 
-import alg.coyote001.model.User;
+import alg.coyote001.entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -5,42 +5,48 @@ import { useNavigate } from 'react-router-dom';
 
 const features = [
   {
-    title: 'Единая панель управления',
-    description: 'Управляйте всеми крипто-активами из одного места',
-    icon: 'solar:widget-6-bold',
+    title: 'Реальное время',
+    description: 'Мониторинг курсов криптовалют в режиме реального времени с мгновенными уведомлениями о важных изменениях.',
+    icon: 'solar:chart-square-bold',
     color: 'primary'
   },
   {
-    title: 'Мгновенная аналитика',
-    description: 'Получайте актуальные данные и графики в реальном времени',
-    icon: 'solar:chart-2-bold',
-    color: 'secondary'
-  },
-  {
-    title: 'Безопасность данных',
-    description: 'Высокий уровень защиты и приватности ваших данных',
+    title: 'Безопасность',
+    description: 'Многоуровневая система защиты данных с современными методами шифрования и аутентификации.',
     icon: 'solar:shield-check-bold',
     color: 'success'
   },
   {
-    title: 'Адаптивный дизайн',
-    description: 'Удобный интерфейс для любых устройств и экранов',
-    icon: 'solar:devices-bold',
+    title: 'Аналитика',
+    description: 'Продвинутые инструменты анализа рынка, графики и прогнозы для принятия обоснованных решений.',
+    icon: 'solar:graph-up-bold',
+    color: 'secondary'
+  },
+  {
+    title: 'Портфолио',
+    description: 'Управление инвестиционным портфелем с детальной статистикой и отчетами о доходности.',
+    icon: 'solar:wallet-money-bold',
     color: 'warning'
   },
   {
-    title: 'Современные технологии',
-    description: 'Быстрый и отзывчивый интерфейс на базе React и TypeScript',
-    icon: 'solar:code-bold',
+    title: 'Уведомления',
+    description: 'Настраиваемые алерты и уведомления о важных событиях на рынке криптовалют.',
+    icon: 'solar:bell-bing-bold',
     color: 'danger'
+  },
+  {
+    title: 'API',
+    description: 'Мощный API для интеграции с внешними сервисами и создания собственных приложений.',
+    icon: 'solar:code-square-bold',
+    color: 'primary'
   },
 ];
 
 const stats = [
-  { label: 'Пользователей', value: '10K+', icon: 'solar:users-group-rounded-bold' },
-  { label: 'Транзакций', value: '1M+', icon: 'solar:transfer-horizontal-bold' },
-  { label: 'Бирж', value: '50+', icon: 'solar:buildings-3-bold' },
+  { label: 'Активных пользователей', value: '10K+', icon: 'solar:users-group-rounded-bold' },
   { label: 'Криптовалют', value: '500+', icon: 'solar:bitcoin-bold' },
+  { label: 'Транзакций в день', value: '1M+', icon: 'solar:graph-up-bold' },
+  { label: 'Стран', value: '50+', icon: 'solar:global-bold' },
 ];
 
 const About: React.FC = () => {
@@ -109,9 +115,7 @@ const About: React.FC = () => {
           {stats.map((stat, index) => (
             <Card
               key={stat.label}
-              variant="glass"
-              hoverable
-              className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl animate-in fade-in-0 slide-in-from-bottom-4"
+              className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl animate-in fade-in-0 slide-in-from-bottom-4 hover:scale-105"
               style={{ animationDelay: `${index * 100}ms` }}
             >
               <div className="p-6 text-center space-y-3">
@@ -146,9 +150,7 @@ const About: React.FC = () => {
               return (
                 <Card
                   key={feature.title}
-                  variant="glass"
-                  hoverable
-                  className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl animate-in fade-in-0 slide-in-from-bottom-4"
+                  className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl animate-in fade-in-0 slide-in-from-bottom-4 hover:scale-105"
                   style={{ animationDelay: `${(index + 4) * 150}ms` }}
                 >
                   <div className="p-6 space-y-4">
@@ -173,7 +175,6 @@ const About: React.FC = () => {
 
         {/* Technology Section */}
         <Card
-          variant="glass"
           className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-bottom-4 duration-700"
           style={{ animationDelay: '1200ms' }}
         >
@@ -200,7 +201,7 @@ const About: React.FC = () => {
                 { name: 'TypeScript', icon: 'logos:typescript-icon' },
                 { name: 'Spring Boot', icon: 'logos:spring-icon' },
                 { name: 'PostgreSQL', icon: 'logos:postgresql' },
-              ].map((tech, index) => (
+              ].map((tech) => (
                 <div
                   key={tech.name}
                   className="flex flex-col items-center gap-2 p-4 bg-background/50 rounded-lg border border-divider/20 hover:bg-background/70 transition-colors duration-200"
@@ -227,21 +228,20 @@ const About: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              variant="primary"
+              color="primary"
               size="lg"
-              gradient
-              icon="solar:rocket-bold"
               onClick={() => navigate('/register')}
-              className="px-8"
+              className="px-8 bg-gradient-to-r from-primary to-secondary"
+              startContent={<Icon icon="solar:rocket-bold" className="w-4 h-4" />}
             >
               Начать использование
             </Button>
             <Button
               variant="ghost"
               size="lg"
-              icon="solar:home-bold"
               onClick={() => navigate('/')}
               className="px-8 border border-divider/30 hover:border-primary/50"
+              startContent={<Icon icon="solar:home-bold" className="w-4 h-4" />}
             >
               На главную
             </Button>
@@ -253,3 +253,6 @@ const About: React.FC = () => {
 };
 
 export default About;
+
+
+

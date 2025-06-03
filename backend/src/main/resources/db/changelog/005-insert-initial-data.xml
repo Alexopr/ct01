@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="005-insert-initial-coins" author="crypto-tracker">
+        <!-- Вставка основных криптовалют -->
+        <insert tableName="coins">
+            <column name="symbol" value="BTC"/>
+            <column name="name" value="Bitcoin"/>
+            <column name="description" value="The first and most well-known cryptocurrency"/>
+            <column name="website_url" value="https://bitcoin.org"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="10"/>
+            <column name="market_rank" value="1"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <insert tableName="coins">
+            <column name="symbol" value="ETH"/>
+            <column name="name" value="Ethereum"/>
+            <column name="description" value="Decentralized platform for smart contracts"/>
+            <column name="website_url" value="https://ethereum.org"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="10"/>
+            <column name="market_rank" value="2"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <insert tableName="coins">
+            <column name="symbol" value="SOL"/>
+            <column name="name" value="Solana"/>
+            <column name="description" value="High-performance blockchain for decentralized applications"/>
+            <column name="website_url" value="https://solana.com"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="9"/>
+            <column name="market_rank" value="5"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <insert tableName="coins">
+            <column name="symbol" value="BNB"/>
+            <column name="name" value="BNB"/>
+            <column name="description" value="Binance ecosystem token"/>
+            <column name="website_url" value="https://www.binance.com"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="8"/>
+            <column name="market_rank" value="4"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <insert tableName="coins">
+            <column name="symbol" value="ADA"/>
+            <column name="name" value="Cardano"/>
+            <column name="description" value="Proof-of-stake blockchain platform"/>
+            <column name="website_url" value="https://cardano.org"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="7"/>
+            <column name="market_rank" value="8"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <insert tableName="coins">
+            <column name="symbol" value="USDT"/>
+            <column name="name" value="Tether"/>
+            <column name="description" value="USD-pegged stablecoin"/>
+            <column name="website_url" value="https://tether.to"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="6"/>
+            <column name="market_rank" value="3"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="005-insert-coin-categories" author="crypto-tracker">
+        <!-- Категории для Bitcoin -->
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'BTC')"/>
+            <column name="category" value="Store of Value"/>
+        </insert>
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'BTC')"/>
+            <column name="category" value="Payment"/>
+        </insert>
+
+        <!-- Категории для Ethereum -->
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'ETH')"/>
+            <column name="category" value="Smart Contracts"/>
+        </insert>
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'ETH')"/>
+            <column name="category" value="DeFi"/>
+        </insert>
+
+        <!-- Категории для Solana -->
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'SOL')"/>
+            <column name="category" value="Smart Contracts"/>
+        </insert>
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'SOL')"/>
+            <column name="category" value="High Performance"/>
+        </insert>
+
+        <!-- Категории для BNB -->
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'BNB')"/>
+            <column name="category" value="Exchange Token"/>
+        </insert>
+
+        <!-- Категории для Cardano -->
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'ADA')"/>
+            <column name="category" value="Smart Contracts"/>
+        </insert>
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'ADA')"/>
+            <column name="category" value="Proof of Stake"/>
+        </insert>
+
+        <!-- Категории для USDT -->
+        <insert tableName="coin_categories">
+            <column name="coin_id" valueComputed="(SELECT id FROM coins WHERE symbol = 'USDT')"/>
+            <column name="category" value="Stablecoin"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="005-insert-initial-exchanges" author="crypto-tracker">
+        <!-- Bybit -->
+        <insert tableName="exchanges">
+            <column name="name" value="bybit"/>
+            <column name="display_name" value="Bybit"/>
+            <column name="base_api_url" value="https://api.bybit.com"/>
+            <column name="websocket_url" value="wss://stream.bybit.com"/>
+            <column name="api_documentation_url" value="https://bybit-exchange.github.io/docs/"/>
+            <column name="max_requests_per_minute" value="120"/>
+            <column name="max_websocket_connections" value="20"/>
+            <column name="enabled" value="true"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="9"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- Binance -->
+        <insert tableName="exchanges">
+            <column name="name" value="binance"/>
+            <column name="display_name" value="Binance"/>
+            <column name="base_api_url" value="https://api.binance.com"/>
+            <column name="websocket_url" value="wss://stream.binance.com:9443"/>
+            <column name="api_documentation_url" value="https://binance-docs.github.io/apidocs/"/>
+            <column name="max_requests_per_minute" value="1200"/>
+            <column name="max_websocket_connections" value="10"/>
+            <column name="enabled" value="true"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="10"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- OKX -->
+        <insert tableName="exchanges">
+            <column name="name" value="okx"/>
+            <column name="display_name" value="OKX"/>
+            <column name="base_api_url" value="https://www.okx.com"/>
+            <column name="websocket_url" value="wss://ws.okx.com:8443"/>
+            <column name="api_documentation_url" value="https://www.okx.com/docs-v5/"/>
+            <column name="max_requests_per_minute" value="60"/>
+            <column name="max_websocket_connections" value="10"/>
+            <column name="enabled" value="true"/>
+            <column name="status" value="ACTIVE"/>
+            <column name="priority" value="8"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="005-insert-exchange-supported-pairs" author="crypto-tracker">
+        <!-- Bybit поддерживаемые пары -->
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'bybit')"/>
+            <column name="trading_pair" value="BTC/USDT"/>
+        </insert>
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'bybit')"/>
+            <column name="trading_pair" value="ETH/USDT"/>
+        </insert>
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'bybit')"/>
+            <column name="trading_pair" value="SOL/USDT"/>
+        </insert>
+
+        <!-- Binance поддерживаемые пары -->
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'binance')"/>
+            <column name="trading_pair" value="BTC/USDT"/>
+        </insert>
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'binance')"/>
+            <column name="trading_pair" value="ETH/USDT"/>
+        </insert>
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'binance')"/>
+            <column name="trading_pair" value="SOL/USDT"/>
+        </insert>
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'binance')"/>
+            <column name="trading_pair" value="BNB/USDT"/>
+        </insert>
+
+        <!-- OKX поддерживаемые пары -->
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'okx')"/>
+            <column name="trading_pair" value="BTC/USDT"/>
+        </insert>
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'okx')"/>
+            <column name="trading_pair" value="ETH/USDT"/>
+        </insert>
+        <insert tableName="exchange_supported_pairs">
+            <column name="exchange_id" valueComputed="(SELECT id FROM exchanges WHERE name = 'okx')"/>
+            <column name="trading_pair" value="SOL/USDT"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog> 

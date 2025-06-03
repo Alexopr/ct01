@@ -1,9 +1,10 @@
 package alg.coyote001.service;
 
 import alg.coyote001.dto.TelegramAuthDto;
-import alg.coyote001.model.User;
-import alg.coyote001.model.Role;
+import alg.coyote001.entity.User;
+import alg.coyote001.entity.Role;
 import alg.coyote001.repository.UserRepository;
+import alg.coyote001.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,12 +22,14 @@ import java.util.*;
 public class TelegramAuthService {
     
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     
     @Value("${app.telegram.bot.token:}")
     private String botToken;
     
-    public TelegramAuthService(UserRepository userRepository) {
+    public TelegramAuthService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
     
     /**
@@ -170,10 +173,17 @@ public class TelegramAuthService {
         user.setPhotoUrl(telegramData.getPhoto_url());
         user.setAuthDate(telegramData.getAuth_date());
         
-        // Устанавливаем роль по умолчанию
-        Set<Role> roles = new HashSet<>();
-        roles.add(Role.USER);
-        user.setRoles(roles);
+        // Устанавливаем статус активного пользователя
+        user.setStatus(User.UserStatus.ACTIVE);
+        
+        // Инициализируем коллекцию ролей
+        user.setRoles(new HashSet<>());
+        
+        // Автоматическое назначение роли USER
+        Role userRole = roleRepository.findByName("USER").orElse(null);
+        if (userRole != null) {
+            user.getRoles().add(userRole);
+        }
         
         return user;
     }

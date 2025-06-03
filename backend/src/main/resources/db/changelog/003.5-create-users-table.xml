@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="003.5-create-users-table" author="crypto-tracker">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)">
+                <constraints unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="email" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="telegram_id" type="BIGINT">
+                <constraints unique="true"/>
+            </column>
+            <column name="telegram_username" type="VARCHAR(255)"/>
+            <column name="photo_url" type="VARCHAR(500)"/>
+            <column name="auth_date" type="BIGINT"/>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Индексы для users -->
+        <createIndex tableName="users" indexName="idx_users_username">
+            <column name="username"/>
+        </createIndex>
+        
+        <createIndex tableName="users" indexName="idx_users_email">
+            <column name="email"/>
+        </createIndex>
+        
+        <createIndex tableName="users" indexName="idx_users_telegram_id">
+            <column name="telegram_id"/>
+        </createIndex>
+        
+        <createIndex tableName="users" indexName="idx_users_telegram_username">
+            <column name="telegram_username"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="003.5-create-user-roles-table" author="crypto-tracker">
+        <createTable tableName="user_roles">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Внешний ключ для user_roles -->
+        <addForeignKeyConstraint
+                baseTableName="user_roles"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_user_roles_user_id"
+                onDelete="CASCADE"/>
+
+        <!-- Индексы для user_roles -->
+        <createIndex tableName="user_roles" indexName="idx_user_roles_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        
+        <createIndex tableName="user_roles" indexName="idx_user_roles_role">
+            <column name="role"/>
+        </createIndex>
+        
+        <!-- Составной индекс -->
+        <createIndex tableName="user_roles" indexName="idx_user_roles_user_role">
+            <column name="user_id"/>
+            <column name="role"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

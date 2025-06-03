@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { Icon } from '@iconify/react';
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { TelegramAuthModal } from "../components/auth";
 import { Button, Input, Card, Alert } from "../components/ui";
-import { Link } from "@heroui/react";
+import { Link } from "@nextui-org/react";
 
 const Login: React.FC = () => {
   const { login, error } = useAuth();
@@ -27,9 +28,8 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/90 to-background/80 flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-in fade-in-0 slide-in-from-bottom-4 duration-1000">
         <Card
-          variant="glass"
+          
           className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-2xl"
-          padding="lg"
         >
           <div className="text-center space-y-6">
             {/* Header */}
@@ -52,8 +52,7 @@ const Login: React.FC = () => {
                 fullWidth
                 required
                 autoFocus
-                leftIcon="solar:user-bold"
-                glassmorphism
+                startContent={<Icon icon="solar:user-bold" className="w-4 h-4" />}
                 placeholder="Введите имя пользователя"
               />
               
@@ -65,18 +64,15 @@ const Login: React.FC = () => {
                 variant="bordered"
                 fullWidth
                 required
-                leftIcon="solar:lock-password-bold"
-                glassmorphism
+                startContent={<Icon icon="solar:lock-password-bold" className="w-4 h-4" />}
                 placeholder="Введите пароль"
               />
 
               <Button
                 type="submit"
-                variant="primary"
+                color="primary"
                 size="lg"
-                fullWidth
-                gradient
-                disabled={loading}
+                fullWidth disabled={loading}
                 className="transition-all duration-300 hover:shadow-xl hover:shadow-primary/25"
               >
                 {loading ? "Вход..." : "Войти"}
@@ -87,7 +83,7 @@ const Login: React.FC = () => {
                 size="lg"
                 fullWidth
                 onClick={() => setTgOpen(true)}
-                icon="logos:telegram"
+                startContent={<Icon icon="logos:telegram" className="w-4 h-4" />}
                 className="border border-divider/30 hover:border-primary/50 transition-all duration-300"
               >
                 Войти через Telegram
@@ -112,7 +108,7 @@ const Login: React.FC = () => {
                     type="error"
                     title="Ошибка входа"
                     description={error}
-                    variant="glass"
+                    
                   />
                 </div>
               )}
@@ -144,3 +140,7 @@ const Login: React.FC = () => {
 };
 
 export default Login; 
+
+
+
+

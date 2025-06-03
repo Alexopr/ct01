@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="004-create-user-coin-preferences-table" author="crypto-tracker">
+        <createTable tableName="user_coin_preferences">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="coin_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_favorite" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notifications_enabled" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="has_alerts" type="BOOLEAN" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_change_threshold" type="DECIMAL(8,4)"/>
+            <column name="target_buy_price" type="DECIMAL(20,8)"/>
+            <column name="target_sell_price" type="DECIMAL(20,8)"/>
+            <column name="portfolio_amount" type="DECIMAL(30,8)"/>
+            <column name="average_buy_price" type="DECIMAL(20,8)"/>
+            
+            <!-- Display Settings (Embedded) -->
+            <column name="show_price_change" type="BOOLEAN" defaultValue="true"/>
+            <column name="show_volume" type="BOOLEAN" defaultValue="true"/>
+            <column name="show_market_cap" type="BOOLEAN" defaultValue="false"/>
+            <column name="display_currency" type="VARCHAR(10)" defaultValue="USD"/>
+            <column name="decimal_places" type="INTEGER" defaultValue="4"/>
+            
+            <!-- Notification Settings (Embedded) -->
+            <column name="notify_target_price" type="BOOLEAN" defaultValue="true"/>
+            <column name="notify_price_change" type="BOOLEAN" defaultValue="true"/>
+            <column name="notify_volume_spike" type="BOOLEAN" defaultValue="false"/>
+            <column name="email_notifications" type="BOOLEAN" defaultValue="true"/>
+            <column name="push_notifications" type="BOOLEAN" defaultValue="false"/>
+            <column name="notification_frequency" type="INTEGER" defaultValue="60"/>
+            
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_price_check" type="TIMESTAMP"/>
+            <column name="last_notification_sent" type="TIMESTAMP"/>
+        </createTable>
+
+        <!-- Внешние ключи -->
+        <addForeignKeyConstraint
+                baseTableName="user_coin_preferences"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_user_coin_preferences_user_id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="user_coin_preferences"
+                baseColumnNames="coin_id"
+                referencedTableName="coins"
+                referencedColumnNames="id"
+                constraintName="fk_user_coin_preferences_coin_id"
+                onDelete="CASCADE"/>
+
+        <!-- Уникальное ограничение -->
+        <addUniqueConstraint
+                tableName="user_coin_preferences"
+                columnNames="user_id, coin_id"
+                constraintName="uk_user_coin_preferences_user_coin"/>
+
+        <!-- Индексы -->
+        <createIndex tableName="user_coin_preferences" indexName="idx_user_coin_user">
+            <column name="user_id"/>
+        </createIndex>
+        
+        <createIndex tableName="user_coin_preferences" indexName="idx_user_coin_coin">
+            <column name="coin_id"/>
+        </createIndex>
+        
+        <createIndex tableName="user_coin_preferences" indexName="idx_user_coin_favorite">
+            <column name="user_id"/>
+            <column name="is_favorite"/>
+        </createIndex>
+        
+        <createIndex tableName="user_coin_preferences" indexName="idx_user_coin_alerts">
+            <column name="user_id"/>
+            <column name="has_alerts"/>
+        </createIndex>
+        
+        <createIndex tableName="user_coin_preferences" indexName="idx_user_coin_notifications">
+            <column name="notifications_enabled"/>
+            <column name="has_alerts"/>
+        </createIndex>
+        
+        <createIndex tableName="user_coin_preferences" indexName="idx_user_coin_price_check">
+            <column name="last_price_check"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="004-create-user-preferred-exchanges-table" author="crypto-tracker">
+        <createTable tableName="user_preferred_exchanges">
+            <column name="user_coin_preference_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="user_preferred_exchanges"
+                baseColumnNames="user_coin_preference_id"
+                referencedTableName="user_coin_preferences"
+                referencedColumnNames="id"
+                constraintName="fk_user_preferred_exchanges_preference_id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="user_preferred_exchanges" indexName="idx_user_preferred_exchanges_preference_id">
+            <column name="user_coin_preference_id"/>
+        </createIndex>
+        
+        <createIndex tableName="user_preferred_exchanges" indexName="idx_user_preferred_exchanges_exchange_name">
+            <column name="exchange_name"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-create-exchanges-table" author="crypto-tracker">
+        <createTable tableName="exchanges">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="display_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="base_api_url" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="websocket_url" type="VARCHAR(500)"/>
+            <column name="api_documentation_url" type="VARCHAR(500)"/>
+            <column name="api_key" type="VARCHAR(1000)"/>
+            <column name="api_secret" type="VARCHAR(1000)"/>
+            <column name="passphrase" type="VARCHAR(1000)"/>
+            <column name="max_requests_per_minute" type="INTEGER" defaultValue="60">
+                <constraints nullable="false"/>
+            </column>
+            <column name="max_websocket_connections" type="INTEGER" defaultValue="10"/>
+            <column name="current_connections" type="INTEGER" defaultValue="0"/>
+            <column name="request_timeout_ms" type="INTEGER" defaultValue="30000"/>
+            <column name="enabled" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="INTEGER" defaultValue="5">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_health_check" type="TIMESTAMP"/>
+            <column name="last_health_status" type="BOOLEAN"/>
+            <column name="last_error_message" type="VARCHAR(1000)"/>
+            <column name="consecutive_errors" type="INTEGER" defaultValue="0"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Создание индексов -->
+        <createIndex tableName="exchanges" indexName="idx_exchange_name">
+            <column name="name"/>
+        </createIndex>
+        
+        <createIndex tableName="exchanges" indexName="idx_exchange_status">
+            <column name="status"/>
+        </createIndex>
+        
+        <createIndex tableName="exchanges" indexName="idx_exchange_enabled">
+            <column name="enabled"/>
+        </createIndex>
+        
+        <createIndex tableName="exchanges" indexName="idx_exchange_priority">
+            <column name="priority"/>
+        </createIndex>
+        
+        <createIndex tableName="exchanges" indexName="idx_exchange_health">
+            <column name="last_health_check"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="002-create-exchange-supported-pairs-table" author="crypto-tracker">
+        <createTable tableName="exchange_supported_pairs">
+            <column name="exchange_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trading_pair" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="exchange_supported_pairs"
+                baseColumnNames="exchange_id"
+                referencedTableName="exchanges"
+                referencedColumnNames="id"
+                constraintName="fk_exchange_pairs_exchange_id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="exchange_supported_pairs" indexName="idx_exchange_pairs_exchange_id">
+            <column name="exchange_id"/>
+        </createIndex>
+        
+        <createIndex tableName="exchange_supported_pairs" indexName="idx_exchange_pairs_trading_pair">
+            <column name="trading_pair"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="002-create-exchange-config-table" author="crypto-tracker">
+        <createTable tableName="exchange_config">
+            <column name="exchange_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="config_key" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="config_value" type="VARCHAR(1000)"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="exchange_config"
+                baseColumnNames="exchange_id"
+                referencedTableName="exchanges"
+                referencedColumnNames="id"
+                constraintName="fk_exchange_config_exchange_id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="exchange_config" indexName="idx_exchange_config_exchange_id">
+            <column name="exchange_id"/>
+        </createIndex>
+        
+        <createIndex tableName="exchange_config" indexName="idx_exchange_config_key">
+            <column name="config_key"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
+import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Input, Card, Alert } from "../components/ui";
-import { Link } from "@heroui/react";
+import { Link } from "@nextui-org/react";
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -35,9 +36,8 @@ const ForgotPassword: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/90 to-background/80 flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-in fade-in-0 slide-in-from-bottom-4 duration-1000">
         <Card
-          variant="glass"
+          
           className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-2xl"
-          padding="lg"
         >
           <div className="text-center space-y-6">
             {/* Header */}
@@ -61,18 +61,15 @@ const ForgotPassword: React.FC = () => {
                 fullWidth
                 required
                 autoFocus
-                leftIcon="solar:letter-bold"
-                glassmorphism
+                startContent={<Icon icon="solar:letter-bold" className="w-4 h-4" />}
                 placeholder="Введите ваш email"
               />
 
               <Button
                 type="submit"
-                variant="primary"
+                color="primary"
                 size="lg"
-                fullWidth
-                gradient
-                disabled={loading}
+                fullWidth disabled={loading}
                 className="transition-all duration-300 hover:shadow-xl hover:shadow-primary/25"
               >
                 {loading ? 'Отправка...' : 'Отправить инструкции'}
@@ -95,7 +92,7 @@ const ForgotPassword: React.FC = () => {
                     type="error"
                     title="Ошибка"
                     description={error}
-                    variant="glass"
+                    
                   />
                 </div>
               )}
@@ -106,7 +103,7 @@ const ForgotPassword: React.FC = () => {
                     type="success"
                     title="Инструкции отправлены"
                     description={message}
-                    variant="glass"
+                    
                   />
                 </div>
               )}
@@ -136,3 +133,7 @@ const ForgotPassword: React.FC = () => {
 };
 
 export default ForgotPassword; 
+
+
+
+

@@ -1,3 +1,5 @@
+import type { User } from './api';
+
 export interface TelegramUser {
   id: number;
   first_name: string;
@@ -8,22 +10,9 @@ export interface TelegramUser {
   hash: string;
 }
 
-export interface User {
-  id: number;
-  telegramId: number;
-  username?: string;
-  email?: string;
-  firstName: string;
-  lastName?: string;
-  photoUrl?: string;
-  roles: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface AuthResponse {
-  user: User;
   message: string;
+  user: User;
 }
 
 export interface TelegramAuthModalProps {

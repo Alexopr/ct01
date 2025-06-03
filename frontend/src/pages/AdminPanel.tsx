@@ -3,7 +3,7 @@ import { Card, Button, Alert, Chip } from '../components/ui';
 import { Icon } from '@iconify/react';
 import { ProtectedRoute } from '../components/auth';
 import api from '../utils/api';
-import type { User } from '../types/auth';
+import type { User } from '../types/api';
 
 interface AdminStats {
   totalUsers: number;
@@ -44,10 +44,29 @@ const AdminPanel: React.FC = () => {
     switch (role) {
       case 'ADMIN':
         return 'danger';
+      case 'PREMIUM':
+        return 'warning';
+      case 'MODERATOR':
+        return 'secondary';
       case 'USER':
         return 'primary';
       default:
         return 'default';
+    }
+  };
+
+  const getRoleDisplayName = (roleName: string): string => {
+    switch (roleName) {
+      case 'ADMIN':
+        return 'Администратор';
+      case 'PREMIUM':
+        return 'Премиум';
+      case 'MODERATOR':
+        return 'Модератор';
+      case 'USER':
+        return 'Пользователь';
+      default:
+        return roleName;
     }
   };
 
@@ -107,7 +126,7 @@ const AdminPanel: React.FC = () => {
               {/* Loading Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {[1, 2, 3].map((i) => (
-                  <Card key={i} variant="glass" className="p-6 animate-pulse">
+                  <Card key={i}  className="p-6 animate-pulse">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-foreground-200 rounded-xl"></div>
                       <div className="space-y-2 flex-1">
@@ -120,7 +139,7 @@ const AdminPanel: React.FC = () => {
               </div>
               
               {/* Loading Table */}
-              <Card variant="glass" className="p-6">
+              <Card  className="p-6">
                 <div className="space-y-4">
                   <div className="h-6 bg-foreground-200 rounded w-1/4"></div>
                   {[1, 2, 3, 4, 5].map((i) => (
@@ -136,10 +155,7 @@ const AdminPanel: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {statsCards.map((stat, index) => (
                     <Card
-                      key={stat.title}
-                      variant="glass"
-                      hoverable
-                      className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl animate-in fade-in-0 slide-in-from-bottom-4"
+                      key={stat.title} className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl animate-in fade-in-0 slide-in-from-bottom-4"
                       style={{ animationDelay: `${index * 150}ms` }}
                     >
                       <div className="p-6">
@@ -160,7 +176,7 @@ const AdminPanel: React.FC = () => {
 
               {/* Users Table */}
               <Card
-                variant="glass"
+                
                 className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-bottom-4 duration-700"
                 style={{ animationDelay: '450ms' }}
               >
@@ -171,9 +187,9 @@ const AdminPanel: React.FC = () => {
                       <h2 className="text-xl font-semibold text-foreground">Пользователи системы</h2>
                     </div>
                     <Button
-                      variant="primary"
+                      color="primary"
                       size="sm"
-                      icon="solar:refresh-bold"
+                      startContent={<Icon icon="solar:refresh-bold" className="w-4 h-4" />}
                       onClick={fetchData}
                       disabled={loading}
                     >
@@ -206,11 +222,11 @@ const AdminPanel: React.FC = () => {
                             <div className="flex gap-1">
                               {user.roles.map((role) => (
                                 <Chip
-                                  key={role}
-                                  color={getRoleColor(role)}
+                                  key={role.id}
+                                  color={getRoleColor(role.name)}
                                   size="sm"
                                 >
-                                  {role}
+                                  {getRoleDisplayName(role.name)}
                                 </Chip>
                               ))}
                             </div>
@@ -252,11 +268,11 @@ const AdminPanel: React.FC = () => {
                         <div className="hidden md:flex gap-1">
                           {user.roles.map((role) => (
                             <Chip
-                              key={role}
-                              color={getRoleColor(role)}
+                              key={role.id}
+                              color={getRoleColor(role.name)}
                               size="sm"
                             >
-                              {role}
+                              {getRoleDisplayName(role.name)}
                             </Chip>
                           ))}
                         </div>
@@ -292,3 +308,6 @@ const AdminPanel: React.FC = () => {
 };
 
 export default AdminPanel;
+
+
+

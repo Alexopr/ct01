@@ -11,28 +11,41 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import alg.coyote001.service.TelegramAuthService;
+import alg.coyote001.service.UserService;
 import alg.coyote001.dto.TelegramAuthDto;
-import alg.coyote001.model.User;
+import alg.coyote001.dto.UserRegistrationDto;
+import alg.coyote001.entity.User;
 import alg.coyote001.security.RateLimitService;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import jakarta.validation.Valid;
 import java.util.stream.Collectors;
 import org.springframework.security.web.csrf.CsrfToken;
 
+/**
+ * REST контроллер для обработки аутентификации и авторизации пользователей.
+ * Поддерживает стандартную аутентификацию по логину/паролю и авторизацию через Telegram.
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final TelegramAuthService telegramAuthService;
+    private final UserService userService;
     private final RateLimitService rateLimitService;
 
-    public AuthController(AuthenticationManager authenticationManager, TelegramAuthService telegramAuthService, RateLimitService rateLimitService) {
+    public AuthController(AuthenticationManager authenticationManager, TelegramAuthService telegramAuthService, UserService userService, RateLimitService rateLimitService) {
         this.authenticationManager = authenticationManager;
         this.telegramAuthService = telegramAuthService;
+        this.userService = userService;
         this.rateLimitService = rateLimitService;
     }
 
+    /**
+     * Получение CSRF токена для защиты от CSRF атак.
+     * 
+     * @param request HTTP запрос
+     * @return ResponseEntity с CSRF токеном и именем заголовка
+     */
     @GetMapping("/csrf")
     public ResponseEntity<?> getCsrfToken(HttpServletRequest request) {
         CsrfToken csrfToken = (CsrfToken) request.getAttribute(CsrfToken.class.getName());
@@ -42,6 +55,14 @@ public class AuthController {
         return ResponseEntity.ok(new CsrfResponse(null, "X-XSRF-TOKEN"));
     }
 
+    /**
+     * Аутентификация пользователя по логину и паролю.
+     * Включает защиту от превышения лимита попыток входа по IP адресу.
+     * 
+     * @param request данные для входа (логин и пароль)
+     * @param httpRequest HTTP запрос для получения IP адреса
+     * @return ResponseEntity с результатом аутентификации
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         // Rate limiting по IP адресу
@@ -65,6 +86,43 @@ public class AuthController {
             return ResponseEntity.ok().build();
         } catch (AuthenticationException e) {
             return ResponseEntity.status(401).body(new ErrorResponse("Неверные учетные данные"));
+        }
+    }
+
+    /**
+     * Регистрация нового пользователя.
+     * Автоматически назначает роль USER всем новым пользователям.
+     * 
+     * @param registrationDto данные для регистрации
+     * @param httpRequest HTTP запрос для получения IP адреса
+     * @return ResponseEntity с результатом регистрации
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDto registrationDto, HttpServletRequest httpRequest) {
+        // Rate limiting по IP адресу
+        String clientIp = getClientIpAddress(httpRequest);
+        if (!rateLimitService.tryConsumeAuth(clientIp)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(new ErrorResponse("Слишком много попыток регистрации. Попробуйте позже."));
+        }
+        
+        try {
+            // Регистрация пользователя с автоматическим назначением роли USER
+            alg.coyote001.dto.UserDto userDto = userService.registerUser(registrationDto);
+            
+            // Сбрасываем лимит при успешной регистрации
+            rateLimitService.resetAuthLimit(clientIp);
+            
+            // Возвращаем данные созданного пользователя
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new RegistrationResponse(
+                    convertToSimpleUserDto(userDto),
+                    "Пользователь успешно зарегистрирован с ролью USER"
+                ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage()));
         }
     }
 
@@ -108,7 +166,7 @@ public class AuthController {
             
             // Создание Spring Security Authentication
             var authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .collect(Collectors.toList());
             
             Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -139,13 +197,21 @@ public class AuthController {
     
     private UserDto convertToUserDto(User user) {
         var roles = user.getRoles().stream()
-            .map(role -> role.name())
+            .map(role -> role.getName())
             .collect(Collectors.toList());
             
         return new UserDto(
             user.getUsername() != null ? user.getUsername() : user.getTelegramId().toString(),
             user.getEmail(),
             roles
+        );
+    }
+    
+    private UserDto convertToSimpleUserDto(alg.coyote001.dto.UserDto userDto) {
+        return new UserDto(
+            userDto.getUsername(),
+            userDto.getEmail(),
+            userDto.getRoleNames().stream().toList()
         );
     }
     
@@ -196,6 +262,15 @@ public class AuthController {
         public UserDto user;
         public String message;
         public TelegramAuthResponse(UserDto user, String message) {
+            this.user = user;
+            this.message = message;
+        }
+    }
+    
+    public static class RegistrationResponse {
+        public UserDto user;
+        public String message;
+        public RegistrationResponse(UserDto user, String message) {
             this.user = user;
             this.message = message;
         }

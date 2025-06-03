@@ -118,8 +118,7 @@ const Notifications: React.FC = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             variant="bordered"
-            glassmorphism
-            leftIcon="solar:magnifer-zoom-in-bold"
+            startContent={<Icon icon="solar:magnifer-zoom-in-bold" className="w-4 h-4" />}
             className="w-full"
           />
         </div>
@@ -131,7 +130,7 @@ const Notifications: React.FC = () => {
             return (
               <Card
                 key={notification.id}
-                variant="glass"
+                
                 className={`
                   backdrop-blur-xl bg-background/30 border shadow-xl transition-all duration-300 hover:shadow-2xl
                   ${notification.isRead ? 'border-divider/20' : 'border-primary/30 bg-primary/5'}
@@ -167,7 +166,7 @@ const Notifications: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              icon="solar:check-circle-bold"
+                              startContent={<Icon icon="solar:check-circle-bold" className="w-4 h-4" />}
                               onClick={() => handleMarkAsRead(notification.id)}
                               className="text-success hover:bg-success/10"
                             />
@@ -212,3 +211,6 @@ const Notifications: React.FC = () => {
 };
 
 export default Notifications; 
+
+
+

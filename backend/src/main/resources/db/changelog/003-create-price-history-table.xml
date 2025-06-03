@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="003-create-price-history-table" author="crypto-tracker">
+        <createTable tableName="price_history">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="coin_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="trading_pair" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="open_price" type="DECIMAL(20,8)"/>
+            <column name="high_price" type="DECIMAL(20,8)"/>
+            <column name="low_price" type="DECIMAL(20,8)"/>
+            <column name="close_price" type="DECIMAL(20,8)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="volume" type="DECIMAL(30,8)"/>
+            <column name="volume_usd" type="DECIMAL(20,2)"/>
+            <column name="trade_count" type="BIGINT"/>
+            <column name="bid_price" type="DECIMAL(20,8)"/>
+            <column name="ask_price" type="DECIMAL(20,8)"/>
+            <column name="spread" type="DECIMAL(20,8)"/>
+            <column name="change24h" type="DECIMAL(8,4)"/>
+            <column name="price_type" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time_interval" type="VARCHAR(10)"/>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Внешние ключи -->
+        <addForeignKeyConstraint
+                baseTableName="price_history"
+                baseColumnNames="coin_id"
+                referencedTableName="coins"
+                referencedColumnNames="id"
+                constraintName="fk_price_history_coin_id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="price_history"
+                baseColumnNames="exchange_id"
+                referencedTableName="exchanges"
+                referencedColumnNames="id"
+                constraintName="fk_price_history_exchange_id"
+                onDelete="CASCADE"/>
+
+        <!-- Составные индексы для эффективных запросов -->
+        <createIndex tableName="price_history" indexName="idx_price_coin_exchange_time">
+            <column name="coin_id"/>
+            <column name="exchange_id"/>
+            <column name="timestamp"/>
+        </createIndex>
+        
+        <createIndex tableName="price_history" indexName="idx_price_coin_time">
+            <column name="coin_id"/>
+            <column name="timestamp"/>
+        </createIndex>
+        
+        <createIndex tableName="price_history" indexName="idx_price_exchange_time">
+            <column name="exchange_id"/>
+            <column name="timestamp"/>
+        </createIndex>
+        
+        <createIndex tableName="price_history" indexName="idx_price_timestamp">
+            <column name="timestamp"/>
+        </createIndex>
+        
+        <createIndex tableName="price_history" indexName="idx_price_type">
+            <column name="price_type"/>
+        </createIndex>
+        
+        <createIndex tableName="price_history" indexName="idx_price_trading_pair">
+            <column name="trading_pair"/>
+        </createIndex>
+        
+        <createIndex tableName="price_history" indexName="idx_price_time_interval">
+            <column name="time_interval"/>
+        </createIndex>
+        
+        <!-- Индекс для поиска последних цен -->
+        <createIndex tableName="price_history" indexName="idx_price_latest">
+            <column name="coin_id"/>
+            <column name="exchange_id"/>
+            <column name="price_type"/>
+            <column name="timestamp"/>
+        </createIndex>
+        
+        <!-- Индекс для очистки старых данных -->
+        <createIndex tableName="price_history" indexName="idx_price_cleanup">
+            <column name="price_type"/>
+            <column name="timestamp"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

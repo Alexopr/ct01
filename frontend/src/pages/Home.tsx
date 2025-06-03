@@ -85,19 +85,17 @@ const Home: React.FC = () => {
                     </p>
                     <div className="flex gap-4">
                       <Button
-                        variant="primary"
-                        size="lg"
-                        gradient
-                        icon="solar:chart-2-bold"
+                        color="primary"
+                        size="lg" startContent={<Icon icon="solar:chart-2-bold" className="w-4 h-4" />}
                         onClick={() => navigate('/dashboard')}
                         className="px-8 py-4 text-lg"
                       >
                         Перейти к аналитике
                       </Button>
                       <Button
-                        variant="secondary"
+                        color="secondary"
                         size="lg"
-                        icon="solar:user-circle-bold"
+                        startContent={<Icon icon="solar:user-circle-bold" className="w-4 h-4" />}
                         onClick={() => navigate('/profile')}
                         className="px-8 py-4 text-lg"
                       >
@@ -109,10 +107,8 @@ const Home: React.FC = () => {
               ) : (
                 <>
                   <Button
-                    variant="primary"
-                    size="lg"
-                    gradient
-                    icon="solar:rocket-bold"
+                    color="primary"
+                    size="lg" startContent={<Icon icon="solar:rocket-bold" className="w-4 h-4" />}
                     onClick={handleGetStarted}
                     className="px-12 py-6 text-xl font-bold shadow-2xl hover:shadow-primary/50 transition-all duration-500 hover:scale-105"
                   >
@@ -121,7 +117,7 @@ const Home: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="lg"
-                    icon="solar:play-circle-bold"
+                    startContent={<Icon icon="solar:play-circle-bold" className="w-4 h-4" />}
                     className="px-8 py-6 text-lg border border-divider/30 hover:border-primary/50"
                   >
                     Смотреть демо
@@ -132,7 +128,7 @@ const Home: React.FC = () => {
 
             {/* Statistics */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto pt-12 animate-in fade-in-0 slide-in-from-bottom-4 duration-1000" style={{ animationDelay: '600ms' }}>
-              {stats.map((stat, index) => (
+              {stats.map((stat) => (
                 <div key={stat.label} className="text-center space-y-2">
                   <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     {stat.value}
@@ -162,12 +158,8 @@ const Home: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {advantages.map((advantage, index) => (
               <Card
-                key={advantage.title}
-                variant="glass"
-                hoverable
-                className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 animate-in fade-in-0 slide-in-from-bottom-4"
+                key={advantage.title} className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 animate-in fade-in-0 slide-in-from-bottom-4"
                 style={{ animationDelay: `${index * 150}ms` }}
-                padding="lg"
               >
                 <div className="text-center space-y-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl backdrop-blur-sm">
@@ -193,7 +185,6 @@ const Home: React.FC = () => {
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <Card
-            variant="gradient"
             className="bg-gradient-to-r from-primary to-secondary p-12 animate-in fade-in-0 slide-in-from-bottom-4 duration-1000"
           >
             <div className="space-y-6">
@@ -233,7 +224,7 @@ const Home: React.FC = () => {
       <Modal 
         isOpen={modalOpen} 
         onClose={handleCloseModal}
-        variant="glass"
+        
         size="sm"
       >
         <ModalContent>
@@ -251,20 +242,18 @@ const Home: React.FC = () => {
           
           <ModalFooter className="flex gap-4 justify-center">
             <Button
-              variant="primary"
-              size="lg"
-              gradient
-              onClick={handleLogin}
-              icon="solar:login-3-bold"
+              color="primary"
+              size="lg" onClick={handleLogin}
+              startContent={<Icon icon="solar:login-3-bold" className="w-4 h-4" />}
               className="flex-1"
             >
               Войти
             </Button>
             <Button
-              variant="secondary"
+              color="secondary"
               size="lg"
               onClick={handleRegister}
-              icon="solar:user-plus-bold"
+              startContent={<Icon icon="solar:user-plus-bold" className="w-4 h-4" />}
               className="flex-1"
             >
               Зарегистрироваться
@@ -277,3 +266,6 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
+
+

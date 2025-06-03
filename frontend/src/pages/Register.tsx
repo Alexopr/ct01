@@ -1,12 +1,19 @@
 import React, { useState } from "react";
+import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { TelegramAuthModal } from "../components/auth";
-import { createUser } from "../services/userService";
+import { register } from "../services/userService";
 import { Button, Input, Card, Alert } from "../components/ui";
-import { Link } from "@heroui/react";
+import { Link } from "@nextui-org/react";
 
 const Register: React.FC = () => {
-  const [form, setForm] = useState({ username: "", password: "", email: "" });
+  const [form, setForm] = useState({ 
+    username: "", 
+    password: "", 
+    email: "",
+    firstName: "",
+    lastName: ""
+  });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [tgOpen, setTgOpen] = useState(false);
@@ -31,9 +38,9 @@ const Register: React.FC = () => {
     setLoading(true);
     
     try {
-      await createUser({ ...form, roles: ["USER"] });
+      await register(form);
       setSuccess(true);
-      setForm({ username: "", password: "", email: "" });
+      setForm({ username: "", password: "", email: "", firstName: "", lastName: "" });
     } catch (e: any) {
       setError(e.message || "Ошибка регистрации");
     } finally {
@@ -45,9 +52,8 @@ const Register: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/90 to-background/80 flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-in fade-in-0 slide-in-from-bottom-4 duration-1000">
         <Card
-          variant="glass"
+          
           className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-2xl"
-          padding="lg"
         >
           <div className="text-center space-y-6">
             {/* Header */}
@@ -71,10 +77,33 @@ const Register: React.FC = () => {
                 fullWidth
                 required
                 autoFocus
-                leftIcon="solar:user-bold"
-                glassmorphism
+                startContent={<Icon icon="solar:user-bold" className="w-4 h-4" />}
                 placeholder="Введите имя пользователя"
               />
+              
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="Имя"
+                  name="firstName"
+                  value={form.firstName}
+                  onChange={handleChange}
+                  variant="bordered"
+                  fullWidth
+                  startContent={<Icon icon="solar:user-id-bold" className="w-4 h-4" />}
+                  placeholder="Ваше имя"
+                />
+                
+                <Input
+                  label="Фамилия"
+                  name="lastName"
+                  value={form.lastName}
+                  onChange={handleChange}
+                  variant="bordered"
+                  fullWidth
+                  startContent={<Icon icon="solar:user-id-bold" className="w-4 h-4" />}
+                  placeholder="Ваша фамилия"
+                />
+              </div>
               
               <Input
                 label="Email"
@@ -85,8 +114,7 @@ const Register: React.FC = () => {
                 variant="bordered"
                 fullWidth
                 required
-                leftIcon="solar:letter-bold"
-                glassmorphism
+                startContent={<Icon icon="solar:letter-bold" className="w-4 h-4" />}
                 placeholder="Введите email"
               />
               
@@ -99,18 +127,15 @@ const Register: React.FC = () => {
                 variant="bordered"
                 fullWidth
                 required
-                leftIcon="solar:lock-password-bold"
-                glassmorphism
+                startContent={<Icon icon="solar:lock-password-bold" className="w-4 h-4" />}
                 placeholder="Введите пароль"
               />
 
               <Button
                 type="submit"
-                variant="primary"
+                color="primary"
                 size="lg"
-                fullWidth
-                gradient
-                disabled={loading}
+                fullWidth disabled={loading}
                 className="transition-all duration-300 hover:shadow-xl hover:shadow-primary/25"
               >
                 {loading ? "Регистрация..." : "Зарегистрироваться"}
@@ -121,7 +146,7 @@ const Register: React.FC = () => {
                 size="lg"
                 fullWidth
                 onClick={() => setTgOpen(true)}
-                icon="logos:telegram"
+                startContent={<Icon icon="logos:telegram" className="w-4 h-4" />}
                 className="border border-divider/30 hover:border-primary/50 transition-all duration-300"
                 disabled={loading}
               >
@@ -134,7 +159,7 @@ const Register: React.FC = () => {
                     type="error"
                     title="Ошибка регистрации"
                     description={error}
-                    variant="glass"
+                    
                   />
                 </div>
               )}
@@ -145,7 +170,7 @@ const Register: React.FC = () => {
                     type="success"
                     title="Регистрация успешна!"
                     description="Переходим на страницу входа..."
-                    variant="glass"
+                    
                   />
                 </div>
               )}
@@ -177,3 +202,7 @@ const Register: React.FC = () => {
 };
 
 export default Register; 
+
+
+
+

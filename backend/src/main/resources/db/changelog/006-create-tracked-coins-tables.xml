@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="006-create-tracked-coins-table" author="system">
+        <comment>Create tracked_coins table for managing cryptocurrency tracking</comment>
+        
+        <createTable tableName="tracked_coins">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="symbol" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="polling_interval_seconds" type="INTEGER">
+                <constraints nullable="true"/>
+            </column>
+            <column name="websocket_enabled" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="INTEGER" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notes" type="VARCHAR(500)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_tracked_coins_symbol" tableName="tracked_coins">
+            <column name="symbol"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_tracked_coins_active" tableName="tracked_coins">
+            <column name="is_active"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_tracked_coins_priority" tableName="tracked_coins">
+            <column name="priority"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="006-create-tracked-coin-exchanges-table" author="system">
+        <comment>Create tracked_coin_exchanges table for storing exchange associations</comment>
+        
+        <createTable tableName="tracked_coin_exchanges">
+            <column name="coin_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="exchange" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            baseTableName="tracked_coin_exchanges"
+            baseColumnNames="coin_id"
+            constraintName="fk_tracked_coin_exchanges_coin_id"
+            referencedTableName="tracked_coins"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_tracked_coin_exchanges_coin_id" tableName="tracked_coin_exchanges">
+            <column name="coin_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_tracked_coin_exchanges_exchange" tableName="tracked_coin_exchanges">
+            <column name="exchange"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="006-create-tracked-coin-quotes-table" author="system">
+        <comment>Create tracked_coin_quotes table for storing quote currency associations</comment>
+        
+        <createTable tableName="tracked_coin_quotes">
+            <column name="coin_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quote_currency" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+            baseTableName="tracked_coin_quotes"
+            baseColumnNames="coin_id"
+            constraintName="fk_tracked_coin_quotes_coin_id"
+            referencedTableName="tracked_coins"
+            referencedColumnNames="id"
+            onDelete="CASCADE"/>
+
+        <createIndex indexName="idx_tracked_coin_quotes_coin_id" tableName="tracked_coin_quotes">
+            <column name="coin_id"/>
+        </createIndex>
+        
+        <createIndex indexName="idx_tracked_coin_quotes_quote" tableName="tracked_coin_quotes">
+            <column name="quote_currency"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="006-insert-sample-tracked-coins" author="system">
+        <comment>Insert sample tracked coins for testing</comment>
+        
+        <insert tableName="tracked_coins">
+            <column name="symbol">BTC</column>
+            <column name="name">Bitcoin</column>
+            <column name="is_active">true</column>
+            <column name="websocket_enabled">true</column>
+            <column name="priority">10</column>
+            <column name="notes">The original cryptocurrency</column>
+        </insert>
+        
+        <insert tableName="tracked_coins">
+            <column name="symbol">ETH</column>
+            <column name="name">Ethereum</column>
+            <column name="is_active">true</column>
+            <column name="websocket_enabled">true</column>
+            <column name="priority">9</column>
+            <column name="notes">Smart contract platform</column>
+        </insert>
+        
+        <insert tableName="tracked_coins">
+            <column name="symbol">ADA</column>
+            <column name="name">Cardano</column>
+            <column name="is_active">true</column>
+            <column name="websocket_enabled">false</column>
+            <column name="priority">5</column>
+            <column name="polling_interval_seconds">60</column>
+            <column name="notes">Proof-of-stake blockchain</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="006-insert-sample-exchanges" author="system">
+        <comment>Insert sample exchange associations</comment>
+        
+        <!-- BTC exchanges -->
+        <insert tableName="tracked_coin_exchanges">
+            <column name="coin_id">1</column>
+            <column name="exchange">BINANCE</column>
+        </insert>
+        <insert tableName="tracked_coin_exchanges">
+            <column name="coin_id">1</column>
+            <column name="exchange">BYBIT</column>
+        </insert>
+        <insert tableName="tracked_coin_exchanges">
+            <column name="coin_id">1</column>
+            <column name="exchange">OKX</column>
+        </insert>
+        
+        <!-- ETH exchanges -->
+        <insert tableName="tracked_coin_exchanges">
+            <column name="coin_id">2</column>
+            <column name="exchange">BINANCE</column>
+        </insert>
+        <insert tableName="tracked_coin_exchanges">
+            <column name="coin_id">2</column>
+            <column name="exchange">BYBIT</column>
+        </insert>
+        
+        <!-- ADA exchanges -->
+        <insert tableName="tracked_coin_exchanges">
+            <column name="coin_id">3</column>
+            <column name="exchange">BINANCE</column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="006-insert-sample-quotes" author="system">
+        <comment>Insert sample quote currency associations</comment>
+        
+        <!-- BTC quote currencies -->
+        <insert tableName="tracked_coin_quotes">
+            <column name="coin_id">1</column>
+            <column name="quote_currency">USDT</column>
+        </insert>
+        <insert tableName="tracked_coin_quotes">
+            <column name="coin_id">1</column>
+            <column name="quote_currency">USDC</column>
+        </insert>
+        
+        <!-- ETH quote currencies -->
+        <insert tableName="tracked_coin_quotes">
+            <column name="coin_id">2</column>
+            <column name="quote_currency">USDT</column>
+        </insert>
+        <insert tableName="tracked_coin_quotes">
+            <column name="coin_id">2</column>
+            <column name="quote_currency">BTC</column>
+        </insert>
+        
+        <!-- ADA quote currencies -->
+        <insert tableName="tracked_coin_quotes">
+            <column name="coin_id">3</column>
+            <column name="quote_currency">USDT</column>
+        </insert>
+        <insert tableName="tracked_coin_quotes">
+            <column name="coin_id">3</column>
+            <column name="quote_currency">BTC</column>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog> 

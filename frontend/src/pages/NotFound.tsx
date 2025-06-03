@@ -125,10 +125,7 @@ const NotFound: React.FC = () => {
               
               return (
                 <Card
-                  key={link.title}
-                  variant="glass"
-                  hoverable
-                  className={`backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-300 hover:shadow-2xl cursor-pointer ${colorClasses.hoverBg} animate-in fade-in-0 slide-in-from-bottom-4`}
+                  key={link.title} className={`backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-300 hover:shadow-2xl cursor-pointer ${colorClasses.hoverBg} animate-in fade-in-0 slide-in-from-bottom-4`}
                   style={{ animationDelay: `${(index + 2) * 150}ms` }}
                   onClick={() => navigate(link.path)}
                 >
@@ -157,10 +154,8 @@ const NotFound: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: '900ms' }}>
           <Button
-            variant="primary"
-            size="lg"
-            gradient
-            icon="solar:home-bold"
+            color="primary"
+            size="lg" startContent={<Icon icon="solar:home-bold" className="w-4 h-4" />}
             onClick={() => navigate('/')}
             className="px-8"
           >
@@ -169,7 +164,7 @@ const NotFound: React.FC = () => {
           <Button
             variant="ghost"
             size="lg"
-            icon="solar:arrow-left-bold"
+            startContent={<Icon icon="solar:arrow-left-bold" className="w-4 h-4" />}
             onClick={() => window.history.back()}
             className="px-8 border border-divider/30 hover:border-primary/50"
           >
@@ -179,7 +174,7 @@ const NotFound: React.FC = () => {
 
         {/* Help Section */}
         <Card
-          variant="glass"
+          
           className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-bottom-4 duration-700"
           style={{ animationDelay: '1200ms' }}
         >
@@ -200,7 +195,7 @@ const NotFound: React.FC = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                icon="solar:chat-round-dots-bold"
+                startContent={<Icon icon="solar:chat-round-dots-bold" className="w-4 h-4" />}
                 className="border border-divider/30 hover:border-info/50"
               >
                 Связаться с поддержкой
@@ -214,3 +209,6 @@ const NotFound: React.FC = () => {
 };
 
 export default NotFound; 
+
+
+

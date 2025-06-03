@@ -1,39 +1,40 @@
 import React, { useState } from "react";
 import { Button, Card } from "../components/ui";
 import { Icon } from '@iconify/react';
-import { useNavigate } from 'react-router-dom';
+import { getColorClasses, isValidColorVariant } from '../utils/colorUtils';
+import type { ColorVariant } from '../utils/colorUtils';
 
 const tools = [
   { 
     id: 1, 
-    name: "Arbitrage Scanner", 
-    desc: "Поиск арбитражных возможностей между биржами", 
-    icon: "solar:transfer-horizontal-bold",
-    color: "primary",
+    name: "Price Monitor", 
+    desc: "Мониторинг цен и алерты", 
+    icon: "solar:graph-up-bold",
+    color: "primary" as ColorVariant,
     comingSoon: false
   },
   { 
     id: 2, 
-    name: "Order Book Analyzer", 
-    desc: "Анализ глубины рынка и стакана заявок", 
-    icon: "solar:chart-2-bold",
-    color: "secondary",
-    comingSoon: false
+    name: "Trading Bot", 
+    desc: "Автоматический торговый бот", 
+    icon: "solar:cpu-bolt-bold",
+    color: "secondary" as ColorVariant,
+    comingSoon: true
   },
   { 
     id: 3, 
-    name: "Signal Tracker", 
-    desc: "Отслеживание и анализ торговых сигналов", 
-    icon: "solar:radar-2-bold",
-    color: "success",
-    comingSoon: false
+    name: "Technical Analysis", 
+    desc: "Инструменты технического анализа", 
+    icon: "solar:chart-2-bold",
+    color: "success" as ColorVariant,
+    comingSoon: true
   },
   { 
     id: 4, 
     name: "Portfolio Analyzer", 
     desc: "Анализ и оптимизация портфеля", 
     icon: "solar:pie-chart-bold",
-    color: "warning",
+    color: "warning" as ColorVariant,
     comingSoon: true
   },
   { 
@@ -41,7 +42,7 @@ const tools = [
     name: "Risk Calculator", 
     desc: "Калькулятор рисков и управление капиталом", 
     icon: "solar:shield-warning-bold",
-    color: "danger",
+    color: "danger" as ColorVariant,
     comingSoon: true
   },
   { 
@@ -49,13 +50,12 @@ const tools = [
     name: "Market Screener", 
     desc: "Сканер рынка и поиск возможностей", 
     icon: "solar:magnifer-zoom-in-bold",
-    color: "primary",
+    color: "primary" as ColorVariant,
     comingSoon: true
   },
 ];
 
 const Tools: React.FC = () => {
-  const navigate = useNavigate();
   const [hoveredTool, setHoveredTool] = useState<number | null>(null);
 
   const handleToolClick = (tool: typeof tools[0]) => {
@@ -64,47 +64,6 @@ const Tools: React.FC = () => {
     }
     // TODO: Добавить навигацию к соответствующим инструментам
     console.log(`Opening tool: ${tool.name}`);
-  };
-
-  const getColorClasses = (color: string) => {
-    switch (color) {
-      case 'primary':
-        return {
-          iconBg: 'from-primary/20 to-primary/30',
-          iconColor: 'text-primary',
-          gradientBorder: 'hover:shadow-primary/20'
-        };
-      case 'secondary':
-        return {
-          iconBg: 'from-secondary/20 to-secondary/30',
-          iconColor: 'text-secondary',
-          gradientBorder: 'hover:shadow-secondary/20'
-        };
-      case 'success':
-        return {
-          iconBg: 'from-success/20 to-success/30',
-          iconColor: 'text-success',
-          gradientBorder: 'hover:shadow-success/20'
-        };
-      case 'warning':
-        return {
-          iconBg: 'from-warning/20 to-warning/30',
-          iconColor: 'text-warning',
-          gradientBorder: 'hover:shadow-warning/20'
-        };
-      case 'danger':
-        return {
-          iconBg: 'from-danger/20 to-danger/30',
-          iconColor: 'text-danger',
-          gradientBorder: 'hover:shadow-danger/20'
-        };
-      default:
-        return {
-          iconBg: 'from-primary/20 to-primary/30',
-          iconColor: 'text-primary',
-          gradientBorder: 'hover:shadow-primary/20'
-        };
-    }
   };
 
   return (
@@ -132,18 +91,18 @@ const Tools: React.FC = () => {
         {/* Tools Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tools.map((tool, index) => {
-            const colorClasses = getColorClasses(tool.color);
+            // Ensure color is valid, fallback to primary if not
+            const validColor = isValidColorVariant(tool.color) ? tool.color : 'primary';
+            const colorClasses = getColorClasses(validColor);
             
             return (
               <Card
                 key={tool.id}
-                variant="glass"
-                hoverable={!tool.comingSoon}
                 className={`
                   backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl 
                   transition-all duration-500 hover:shadow-2xl ${colorClasses.gradientBorder}
                   animate-in fade-in-0 slide-in-from-bottom-4
-                  ${tool.comingSoon ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer'}
+                  ${tool.comingSoon ? 'opacity-75 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}
                 `}
                 style={{ animationDelay: `${index * 150}ms` }}
                 onMouseEnter={() => setHoveredTool(tool.id)}
@@ -196,12 +155,11 @@ const Tools: React.FC = () => {
                       </Button>
                     ) : (
                       <Button
-                        variant={tool.color as any}
+                        variant="solid"
                         size="md"
-                        gradient={tool.color === 'primary' || tool.color === 'secondary'}
-                        icon="solar:arrow-right-bold"
-                        className="w-full transition-all duration-300 hover:shadow-lg"
+                        className="w-full transition-all duration-300 hover:shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
                       >
+                        <Icon icon="solar:arrow-right-bold" className="w-4 h-4 mr-2" />
                         Открыть инструмент
                       </Button>
                     )}
@@ -215,7 +173,6 @@ const Tools: React.FC = () => {
         {/* Additional Features Section */}
         <div className="pt-8">
           <Card
-            variant="glass"
             className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-bottom-4 duration-700"
             style={{ animationDelay: '900ms' }}
           >
@@ -229,23 +186,22 @@ const Tools: React.FC = () => {
                   Предложите свою идею или запросите разработку индивидуального инструмента.
                 </p>
               </div>
-
+              
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button
-                  variant="primary"
+                  variant="solid"
                   size="lg"
-                  gradient
-                  icon="solar:lightbulb-bolt-bold"
-                  className="px-8"
+                  className="bg-gradient-to-r from-primary to-secondary text-white transition-all duration-300 hover:shadow-lg"
                 >
+                  <Icon icon="solar:lightbulb-bolt-bold" className="w-5 h-5 mr-2" />
                   Предложить идею
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="bordered"
                   size="lg"
-                  icon="solar:chat-round-call-bold"
-                  className="px-8 border border-divider/30 hover:border-primary/50"
+                  className="border-primary text-primary hover:bg-primary/10 transition-all duration-300"
                 >
+                  <Icon icon="solar:phone-bold" className="w-5 h-5 mr-2" />
                   Связаться с нами
                 </Button>
               </div>
@@ -258,3 +214,6 @@ const Tools: React.FC = () => {
 };
 
 export default Tools; 
+
+
+

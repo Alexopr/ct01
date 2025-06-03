@@ -1,11 +1,12 @@
 package alg.coyote001.mapper;
 
 import alg.coyote001.dto.UserCacheDto;
-import alg.coyote001.model.User;
+import alg.coyote001.entity.User;
 import org.springframework.stereotype.Component;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Маппер для преобразования User в UserCacheDto для кэширования.
@@ -19,7 +20,7 @@ public class UserCacheMapper {
             return null;
         }
         Set<String> roles = user.getRoles() != null
-            ? user.getRoles().stream().map(Enum::name).collect(Collectors.toSet())
+            ? user.getRoles().stream().map(role -> role.getName()).collect(Collectors.toSet())
             : null;
         return new UserCacheDto(
             user.getId(),

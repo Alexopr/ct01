@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { Icon } from "@iconify/react";
-import { Avatar, Chip, Divider, Button } from "@heroui/react";
+import { Avatar, Chip, Divider, Button } from "@nextui-org/react";
 import { RoleGuard } from './auth';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,7 +25,7 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({
   isOpen = false, 
   onClose 
 }) => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
 
   const isActiveRoute = (route: string) => {
@@ -165,7 +165,7 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({
           <div className="p-3 border-t border-divider/20 bg-content2/30 rounded-lg">
             <div className="flex items-center gap-3 mb-3">
               <Avatar
-                src={user.photoUrl}
+                src={user.telegramPhotoUrl}
                 name={user.firstName?.[0] || user.username?.[0] || 'U'}
                 size="md"
                 className="bg-primary text-primary-foreground"
@@ -184,13 +184,13 @@ const Sidebar: React.FC<{ isOpen?: boolean; onClose?: () => void }> = ({
             <div className="flex flex-wrap gap-1">
               {user.roles.map((role) => (
                 <Chip
-                  key={role}
+                  key={role.id}
                   size="sm"
                   variant="flat"
-                  color={role === 'ADMIN' ? 'danger' : 'primary'}
+                  color={role.name === 'ADMIN' ? 'danger' : 'primary'}
                   className="text-xs"
                 >
-                  {role}
+                  {role.name}
                 </Chip>
               ))}
             </div>

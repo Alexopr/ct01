@@ -1,50 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { Card, Button, Input, Alert, Modal, Chip } from "../components/ui";
 import { Icon } from '@iconify/react';
-import { Select, SelectItem } from "@heroui/react";
-import { getUsers, updateUser, deleteUser } from "../services/userService";
-
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  roles: string[];
-}
+import { Select, SelectItem } from "@nextui-org/react";
+import { updateUser, deleteUser, assignRole, removeRole, getRoles } from "../services/userService";
+import { apiService } from '../services/api';
+import type { User, UserFormData, Role } from '../types/api';
 
 const UserManagement: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [editUser, setEditUser] = useState<User | null>(null);
+  const [editUser, setEditUser] = useState<{id: number} & Partial<UserFormData> | null>(null);
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [roleActionLoading, setRoleActionLoading] = useState<{userId: number, roleId: number} | null>(null);
 
   useEffect(() => {
-    fetchUsers();
+    fetchData();
   }, []);
 
-  const fetchUsers = async () => {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await getUsers();
-      setUsers(data);
+      const [usersResponse, rolesResponse] = await Promise.all([
+        apiService.getUsers(),
+        getRoles()
+      ]);
+      setUsers(usersResponse.content);
+      setRoles(rolesResponse);
     } catch (e: any) {
-      setError(e.message || "Ошибка загрузки пользователей");
+      setError(e.message || "Ошибка загрузки данных");
     }
     setLoading(false);
   };
 
   const handleEdit = (user: User) => {
-    setEditUser({ ...user });
+    const userFormData = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      roles: user.roles.map(role => role.id)
+    };
+    setEditUser(userFormData);
     setOpen(true);
   };
 
   const handleDelete = async (id: number) => {
     try {
       await deleteUser(id);
-      fetchUsers();
+      fetchData();
       setDeleteConfirm(null);
     } catch (e: any) {
       setError(e.message || "Ошибка удаления");
@@ -52,15 +61,32 @@ const UserManagement: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (editUser) {
+    if (editUser && editUser.id) {
       try {
-        await updateUser(editUser.id, editUser);
+        const { id, ...userData } = editUser;
+        await updateUser(id, userData);
         setOpen(false);
         setEditUser(null);
-        fetchUsers();
+        fetchData();
       } catch (e: any) {
         setError(e.message || "Ошибка сохранения");
       }
+    }
+  };
+
+  const handleQuickRoleToggle = async (userId: number, roleId: number, hasRole: boolean) => {
+    setRoleActionLoading({ userId, roleId });
+    try {
+      if (hasRole) {
+        await removeRole(userId, roleId);
+      } else {
+        await assignRole(userId, roleId);
+      }
+      fetchData();
+    } catch (e: any) {
+      setError(e.message || "Ошибка изменения роли");
+    } finally {
+      setRoleActionLoading(null);
     }
   };
 
@@ -73,10 +99,29 @@ const UserManagement: React.FC = () => {
     switch (role) {
       case 'ADMIN':
         return 'danger';
+      case 'PREMIUM':
+        return 'warning';
+      case 'MODERATOR':
+        return 'secondary';
       case 'USER':
         return 'primary';
       default:
         return 'default';
+    }
+  };
+
+  const getRoleDisplayName = (roleName: string): string => {
+    switch (roleName) {
+      case 'ADMIN':
+        return 'Администратор';
+      case 'PREMIUM':
+        return 'Премиум';
+      case 'MODERATOR':
+        return 'Модератор';
+      case 'USER':
+        return 'Пользователь';
+      default:
+        return roleName;
     }
   };
 
@@ -93,7 +138,7 @@ const UserManagement: React.FC = () => {
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Управление пользователями
             </h1>
-            <p className="text-foreground-600">Редактирование и управление учетными записями</p>
+            <p className="text-foreground-600">Редактирование и управление учетными записями и ролями</p>
           </div>
         </div>
 
@@ -105,20 +150,17 @@ const UserManagement: React.FC = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               variant="bordered"
-              glassmorphism
-              leftIcon="solar:magnifer-zoom-in-bold"
+              startContent={<Icon icon="solar:magnifer-zoom-in-bold" className="w-4 h-4" />}
               className="w-full"
             />
           </div>
           
           <Button
-            variant="primary"
+            color="primary"
             size="md"
-            icon="solar:refresh-bold"
-            onClick={fetchUsers}
-            disabled={loading}
-            gradient
-          >
+            startContent={<Icon icon="solar:refresh-bold" className="w-4 h-4" />}
+            onClick={fetchData}
+            disabled={loading} >
             Обновить
           </Button>
         </div>
@@ -136,7 +178,7 @@ const UserManagement: React.FC = () => {
 
         {/* Users Table */}
         <Card
-          variant="glass"
+          
           className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-bottom-4 duration-700"
         >
           <div className="p-6">
@@ -160,11 +202,12 @@ const UserManagement: React.FC = () => {
             ) : (
               <>
                 {/* Table Header */}
-                <div className="hidden md:grid grid-cols-5 gap-4 p-4 bg-foreground-50 rounded-lg mb-4 text-sm font-semibold text-foreground-700">
+                <div className="hidden md:grid grid-cols-6 gap-4 p-4 bg-foreground-50 rounded-lg mb-4 text-sm font-semibold text-foreground-700">
                   <div>ID</div>
                   <div>Пользователь</div>
                   <div>Email</div>
                   <div>Роли</div>
+                  <div>Управление ролями</div>
                   <div>Действия</div>
                 </div>
 
@@ -173,7 +216,7 @@ const UserManagement: React.FC = () => {
                   {filteredUsers.map((user, index) => (
                     <div
                       key={user.id}
-                      className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-background/50 rounded-lg border border-divider/20 hover:bg-background/70 transition-colors duration-200 animate-in fade-in-0 slide-in-from-left-4"
+                      className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 bg-background/50 rounded-lg border border-divider/20 hover:bg-background/70 transition-colors duration-200 animate-in fade-in-0 slide-in-from-left-4"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
                       {/* Mobile Layout */}
@@ -184,7 +227,7 @@ const UserManagement: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              icon="solar:pen-bold"
+                              startContent={<Icon icon="solar:pen-bold" className="w-4 h-4" />}
                               onClick={() => handleEdit(user)}
                             >
                               Изменить
@@ -192,7 +235,7 @@ const UserManagement: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              icon="solar:trash-bin-trash-bold"
+                              startContent={<Icon icon="solar:trash-bin-trash-bold" className="w-4 h-4" />}
                               onClick={() => setDeleteConfirm(user.id)}
                               className="text-danger hover:bg-danger/10"
                             >
@@ -204,16 +247,46 @@ const UserManagement: React.FC = () => {
                           <div className="font-medium text-foreground">{user.username}</div>
                           <div className="text-sm text-foreground-600">{user.email}</div>
                         </div>
-                        <div className="flex gap-1">
-                          {user.roles.map((role) => (
-                            <Chip
-                              key={role}
-                              color={getRoleColor(role)}
-                              size="sm"
-                            >
-                              {role}
-                            </Chip>
-                          ))}
+                        <div className="space-y-2">
+                          <div className="flex gap-1 flex-wrap">
+                            {user.roles.map((role) => (
+                              <Chip
+                                key={role.id}
+                                color={getRoleColor(role.name)}
+                                size="sm"
+                              >
+                                {getRoleDisplayName(role.name)}
+                              </Chip>
+                            ))}
+                          </div>
+                          <div className="flex gap-1 flex-wrap">
+                            {roles.map((role) => {
+                              const hasRole = user.roles.some(ur => ur.id === role.id);
+                              const isLoading = roleActionLoading?.userId === user.id && roleActionLoading?.roleId === role.id;
+                              return (
+                                <Button
+                                  key={role.id}
+                                  size="sm"
+                                  variant={hasRole ? "solid" : "ghost"}
+                                  color={hasRole ? getRoleColor(role.name) : "default"}
+                                  onClick={() => handleQuickRoleToggle(user.id, role.id, hasRole)}
+                                  disabled={isLoading}
+                                  startContent={
+                                    isLoading ? (
+                                      <Icon icon="solar:refresh-bold" className="w-3 h-3 animate-spin" />
+                                    ) : hasRole ? (
+                                      <Icon icon="solar:check-circle-bold" className="w-3 h-3" />
+                                    ) : (
+                                      <Icon icon="solar:add-circle-bold" className="w-3 h-3" />
+                                    )
+                                  }
+                                  className="text-xs"
+                                >
+                                  {getRoleDisplayName(role.name)}
+                                </Button>
+                              );
+                            })}
+                          </div>
                         </div>
                       </div>
 
@@ -227,22 +300,50 @@ const UserManagement: React.FC = () => {
                       <div className="hidden md:block text-sm text-foreground-600">
                         {user.email}
                       </div>
-                      <div className="hidden md:flex gap-1">
+                      <div className="hidden md:flex gap-1 flex-wrap">
                         {user.roles.map((role) => (
                           <Chip
-                            key={role}
-                            color={getRoleColor(role)}
+                            key={role.id}
+                            color={getRoleColor(role.name)}
                             size="sm"
                           >
-                            {role}
+                            {getRoleDisplayName(role.name)}
                           </Chip>
                         ))}
+                      </div>
+                      <div className="hidden md:flex gap-1 flex-wrap">
+                        {roles.map((role) => {
+                          const hasRole = user.roles.some(ur => ur.id === role.id);
+                          const isLoading = roleActionLoading?.userId === user.id && roleActionLoading?.roleId === role.id;
+                          return (
+                            <Button
+                              key={role.id}
+                              size="sm"
+                              variant={hasRole ? "solid" : "ghost"}
+                              color={hasRole ? getRoleColor(role.name) : "default"}
+                              onClick={() => handleQuickRoleToggle(user.id, role.id, hasRole)}
+                              disabled={isLoading}
+                              startContent={
+                                isLoading ? (
+                                  <Icon icon="solar:refresh-bold" className="w-3 h-3 animate-spin" />
+                                ) : hasRole ? (
+                                  <Icon icon="solar:check-circle-bold" className="w-3 h-3" />
+                                ) : (
+                                  <Icon icon="solar:add-circle-bold" className="w-3 h-3" />
+                                )
+                              }
+                              className="text-xs"
+                            >
+                              {getRoleDisplayName(role.name)}
+                            </Button>
+                          );
+                        })}
                       </div>
                       <div className="hidden md:flex gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          icon="solar:pen-bold"
+                          startContent={<Icon icon="solar:pen-bold" className="w-4 h-4" />}
                           onClick={() => handleEdit(user)}
                         >
                           Изменить
@@ -250,7 +351,7 @@ const UserManagement: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          icon="solar:trash-bin-trash-bold"
+                          startContent={<Icon icon="solar:trash-bin-trash-bold" className="w-4 h-4" />}
                           onClick={() => setDeleteConfirm(user.id)}
                           className="text-danger hover:bg-danger/10"
                         >
@@ -293,7 +394,6 @@ const UserManagement: React.FC = () => {
               value={editUser?.username || ""}
               onChange={(e) => setEditUser(editUser ? { ...editUser, username: e.target.value } : null)}
               variant="bordered"
-              glassmorphism
             />
             
             <Input
@@ -302,23 +402,41 @@ const UserManagement: React.FC = () => {
               value={editUser?.email || ""}
               onChange={(e) => setEditUser(editUser ? { ...editUser, email: e.target.value } : null)}
               variant="bordered"
-              glassmorphism
             />
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Имя"
+                value={editUser?.firstName || ""}
+                onChange={(e) => setEditUser(editUser ? { ...editUser, firstName: e.target.value } : null)}
+                variant="bordered"
+              />
+              
+              <Input
+                label="Фамилия"
+                value={editUser?.lastName || ""}
+                onChange={(e) => setEditUser(editUser ? { ...editUser, lastName: e.target.value } : null)}
+                variant="bordered"
+              />
+            </div>
             
             <Select
               label="Роли"
               placeholder="Выберите роли"
               selectionMode="multiple"
-              selectedKeys={editUser?.roles || []}
+              selectedKeys={editUser?.roles?.map(String) || []}
               onSelectionChange={(keys) => {
-                const rolesArray = Array.from(keys) as string[];
+                const rolesArray = Array.from(keys).map(key => Number(key));
                 setEditUser(editUser ? { ...editUser, roles: rolesArray } : null);
               }}
               variant="bordered"
               className="w-full"
             >
-              <SelectItem key="USER">USER</SelectItem>
-              <SelectItem key="ADMIN">ADMIN</SelectItem>
+              {roles.map((role) => (
+                <SelectItem key={role.id} value={role.id}>
+                  {getRoleDisplayName(role.name)}
+                </SelectItem>
+              ))}
             </Select>
           </div>
           
@@ -334,10 +452,8 @@ const UserManagement: React.FC = () => {
               Отмена
             </Button>
             <Button
-              variant="primary"
-              onClick={handleSave}
-              gradient
-              className="flex-1"
+              color="primary"
+              onClick={handleSave} className="flex-1"
             >
               Сохранить
             </Button>
@@ -372,7 +488,7 @@ const UserManagement: React.FC = () => {
               Отмена
             </Button>
             <Button
-              variant="danger"
+              color="danger"
               onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
               className="flex-1"
             >
@@ -386,3 +502,6 @@ const UserManagement: React.FC = () => {
 };
 
 export default UserManagement; 
+
+
+

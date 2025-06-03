@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Button, Card, Input, Alert } from "../components/ui";
-import { Tabs, Tab, Switch, Select, SelectItem } from "@heroui/react";
+import { Tabs, Tab, Switch, Select, SelectItem } from "@nextui-org/react";
 import { Icon } from '@iconify/react';
+import CryptoTickerSettings from "../components/CryptoTickerSettings";
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState("account");
@@ -110,7 +111,7 @@ const Settings: React.FC = () => {
 
         {/* Main Settings Card */}
         <Card
-          variant="glass"
+          
           className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-top-4 duration-700"
           style={{ animationDelay: '200ms' }}
         >
@@ -154,8 +155,7 @@ const Settings: React.FC = () => {
                       value={accountData.email}
                       onChange={handleAccountChange}
                       variant="bordered"
-                      glassmorphism
-                      leftIcon="solar:letter-bold"
+                      startContent={<Icon icon="solar:letter-bold" className="w-4 h-4" />}
                       placeholder="Введите email"
                     />
                     
@@ -166,8 +166,7 @@ const Settings: React.FC = () => {
                       value={accountData.currentPassword}
                       onChange={handleAccountChange}
                       variant="bordered"
-                      glassmorphism
-                      leftIcon="solar:lock-password-bold"
+                      startContent={<Icon icon="solar:lock-password-bold" className="w-4 h-4" />}
                       placeholder="Введите текущий пароль"
                     />
                     
@@ -179,8 +178,7 @@ const Settings: React.FC = () => {
                         value={accountData.password}
                         onChange={handleAccountChange}
                         variant="bordered"
-                        glassmorphism
-                        leftIcon="solar:lock-password-unlocked-bold"
+                        startContent={<Icon icon="solar:lock-password-unlocked-bold" className="w-4 h-4" />}
                         placeholder="Новый пароль"
                       />
                       <Input
@@ -190,8 +188,7 @@ const Settings: React.FC = () => {
                         value={accountData.confirmPassword}
                         onChange={handleAccountChange}
                         variant="bordered"
-                        glassmorphism
-                        leftIcon="solar:lock-password-unlocked-bold"
+                        startContent={<Icon icon="solar:lock-password-unlocked-bold" className="w-4 h-4" />}
                         placeholder="Подтвердите пароль"
                       />
                     </div>
@@ -199,11 +196,9 @@ const Settings: React.FC = () => {
                     <div className="flex justify-end pt-4">
                       <Button
                         type="submit"
-                        variant="primary"
-                        size="lg"
-                        gradient
-                        disabled={loading}
-                        icon="solar:check-circle-bold"
+                        color="primary"
+                        size="lg" disabled={loading}
+                        startContent={<Icon icon="solar:check-circle-bold" className="w-4 h-4" />}
                       >
                         {loading ? 'Сохранение...' : 'Сохранить изменения'}
                       </Button>
@@ -393,6 +388,21 @@ const Settings: React.FC = () => {
                   </div>
                 </div>
               </Tab>
+
+              <Tab
+                key="ticker"
+                title={
+                  <div className="flex items-center space-x-2">
+                    <Icon icon="solar:chart-2-bold" className="w-4 h-4" />
+                    <span>Криптотикер</span>
+                  </div>
+                }
+              >
+                {/* Crypto Ticker Settings */}
+                <div className="mt-6">
+                  <CryptoTickerSettings />
+                </div>
+              </Tab>
             </Tabs>
           </div>
         </Card>
@@ -404,7 +414,7 @@ const Settings: React.FC = () => {
               type="success"
               title="Настройки сохранены"
               description="Ваши настройки успешно обновлены"
-              variant="glass"
+              
             />
           </div>
         )}
@@ -415,7 +425,7 @@ const Settings: React.FC = () => {
               type="error"
               title="Ошибка сохранения"
               description={error}
-              variant="glass"
+              
             />
           </div>
         )}
@@ -425,3 +435,6 @@ const Settings: React.FC = () => {
 };
 
 export default Settings; 
+
+
+

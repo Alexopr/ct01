@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getUsers, deleteUser } from "../services/userService";
-import type { User } from "../services/userService";
+import { apiService } from "../services/api";
+import type { User, PaginatedResponse } from "../types/api";
 import { useNavigate, Link } from "react-router-dom";
 import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import type { GridColDef, GridActionsColDef } from "@mui/x-data-grid";
@@ -15,8 +15,8 @@ const UserList: React.FC = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const data = await getUsers();
-      setUsers(data);
+      const response: PaginatedResponse<User> = await apiService.getUsers();
+      setUsers(response.content);
       setError(null);
     } catch (e: any) {
       setError(e.message || "Ошибка загрузки пользователей");
@@ -31,7 +31,7 @@ const UserList: React.FC = () => {
   const handleDelete = async (id: number) => {
     if (!window.confirm("Удалить пользователя?")) return;
     try {
-      await deleteUser(id);
+      await apiService.deleteUser(id);
       setUsers(users.filter(u => u.id !== id));
     } catch (e: any) {
       setError(e.message || "Ошибка удаления");
@@ -156,3 +156,6 @@ const UserList: React.FC = () => {
 };
 
 export default UserList; 
+
+
+

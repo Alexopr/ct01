@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="001-create-coins-table" author="crypto-tracker">
+        <createTable tableName="coins">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="symbol" type="VARCHAR(10)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="icon_url" type="VARCHAR(500)"/>
+            <column name="description" type="TEXT"/>
+            <column name="website_url" type="VARCHAR(500)"/>
+            <column name="whitepaper_url" type="VARCHAR(500)"/>
+            <column name="max_supply" type="DECIMAL(30,8)"/>
+            <column name="circulating_supply" type="DECIMAL(30,8)"/>
+            <column name="market_cap" type="DECIMAL(20,2)"/>
+            <column name="market_rank" type="INTEGER"/>
+            <column name="status" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="INTEGER" defaultValue="5">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_sync_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <!-- Создание индексов -->
+        <createIndex tableName="coins" indexName="idx_coin_symbol">
+            <column name="symbol"/>
+        </createIndex>
+        
+        <createIndex tableName="coins" indexName="idx_coin_status">
+            <column name="status"/>
+        </createIndex>
+        
+        <createIndex tableName="coins" indexName="idx_coin_symbol_status">
+            <column name="symbol"/>
+            <column name="status"/>
+        </createIndex>
+        
+        <createIndex tableName="coins" indexName="idx_coin_priority">
+            <column name="priority"/>
+        </createIndex>
+        
+        <createIndex tableName="coins" indexName="idx_coin_market_rank">
+            <column name="market_rank"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="001-create-coin-categories-table" author="crypto-tracker">
+        <createTable tableName="coin_categories">
+            <column name="coin_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="coin_categories"
+                baseColumnNames="coin_id"
+                referencedTableName="coins"
+                referencedColumnNames="id"
+                constraintName="fk_coin_categories_coin_id"
+                onDelete="CASCADE"/>
+
+        <createIndex tableName="coin_categories" indexName="idx_coin_categories_coin_id">
+            <column name="coin_id"/>
+        </createIndex>
+        
+        <createIndex tableName="coin_categories" indexName="idx_coin_categories_category">
+            <column name="category"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

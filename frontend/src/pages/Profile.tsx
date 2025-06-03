@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Button, Card, Input, Alert } from "../components/ui";
-import { Avatar, Badge } from "@heroui/react";
+import { Avatar, Badge } from "@nextui-org/react";
 import { Icon } from '@iconify/react';
 
 const Profile: React.FC = () => {
@@ -89,7 +89,7 @@ const Profile: React.FC = () => {
 
         {/* Profile Header Card */}
         <Card
-          variant="glass"
+          
           className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-top-4 duration-700"
           style={{ animationDelay: '200ms' }}
         >
@@ -132,10 +132,8 @@ const Profile: React.FC = () => {
                 <div className="flex gap-3 justify-center md:justify-start">
                   {!editing ? (
                     <Button
-                      variant="primary"
-                      size="lg"
-                      gradient
-                      icon="solar:pen-bold"
+                      color="primary"
+                      size="lg" startContent={<Icon icon="solar:pen-bold" className="w-4 h-4" />}
                       onClick={() => setEditing(true)}
                     >
                       Редактировать профиль
@@ -143,10 +141,8 @@ const Profile: React.FC = () => {
                   ) : (
                     <div className="flex gap-2">
                       <Button
-                        variant="primary"
-                        size="md"
-                        gradient
-                        icon="solar:check-circle-bold"
+                        color="primary"
+                        size="md" startContent={<Icon icon="solar:check-circle-bold" className="w-4 h-4" />}
                         onClick={handleSave}
                         disabled={loading}
                       >
@@ -155,7 +151,7 @@ const Profile: React.FC = () => {
                       <Button
                         variant="ghost"
                         size="md"
-                        icon="solar:close-circle-bold"
+                        startContent={<Icon icon="solar:close-circle-bold" className="w-4 h-4" />}
                         onClick={handleCancel}
                         disabled={loading}
                       >
@@ -168,7 +164,7 @@ const Profile: React.FC = () => {
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 gap-4 min-w-fit">
-                {profileStats.map((stat, index) => (
+                {profileStats.map((stat) => (
                   <div key={stat.label} className="text-center space-y-1">
                     <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg backdrop-blur-sm">
                       <Icon icon={stat.icon} className="w-5 h-5 text-primary" />
@@ -187,7 +183,7 @@ const Profile: React.FC = () => {
           
           {/* Personal Information */}
           <Card
-            variant="glass"
+            
             className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-left-4 duration-700"
             style={{ animationDelay: '400ms' }}
           >
@@ -210,8 +206,7 @@ const Profile: React.FC = () => {
                     onChange={handleInputChange}
                     variant="bordered"
                     disabled={!editing}
-                    glassmorphism
-                    leftIcon="solar:user-bold"
+                    startContent={<Icon icon="solar:user-bold" className="w-4 h-4" />}
                     placeholder="Введите имя"
                   />
                   <Input
@@ -221,8 +216,7 @@ const Profile: React.FC = () => {
                     onChange={handleInputChange}
                     variant="bordered"
                     disabled={!editing}
-                    glassmorphism
-                    leftIcon="solar:user-bold"
+                    startContent={<Icon icon="solar:user-bold" className="w-4 h-4" />}
                     placeholder="Введите фамилию"
                   />
                 </div>
@@ -234,8 +228,7 @@ const Profile: React.FC = () => {
                   onChange={handleInputChange}
                   variant="bordered"
                   disabled={!editing}
-                  glassmorphism
-                  leftIcon="solar:user-id-bold"
+                  startContent={<Icon icon="solar:user-id-bold" className="w-4 h-4" />}
                   placeholder="Введите имя пользователя"
                 />
                 
@@ -247,8 +240,7 @@ const Profile: React.FC = () => {
                   onChange={handleInputChange}
                   variant="bordered"
                   disabled={!editing}
-                  glassmorphism
-                  leftIcon="solar:letter-bold"
+                  startContent={<Icon icon="solar:letter-bold" className="w-4 h-4" />}
                   placeholder="Введите email"
                 />
                 
@@ -259,8 +251,7 @@ const Profile: React.FC = () => {
                   onChange={handleInputChange}
                   variant="bordered"
                   disabled={!editing}
-                  glassmorphism
-                  leftIcon="solar:phone-bold"
+                  startContent={<Icon icon="solar:phone-bold" className="w-4 h-4" />}
                   placeholder="Введите номер телефона"
                 />
               </form>
@@ -269,7 +260,7 @@ const Profile: React.FC = () => {
 
           {/* Additional Information */}
           <Card
-            variant="glass"
+            
             className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-right-4 duration-700"
             style={{ animationDelay: '500ms' }}
           >
@@ -331,7 +322,7 @@ const Profile: React.FC = () => {
               type="success"
               title="Профиль обновлен"
               description="Ваши данные успешно сохранены"
-              variant="glass"
+              
             />
           </div>
         )}
@@ -342,7 +333,7 @@ const Profile: React.FC = () => {
               type="error"
               title="Ошибка сохранения"
               description={error}
-              variant="glass"
+              
             />
           </div>
         )}
@@ -352,3 +343,6 @@ const Profile: React.FC = () => {
 };
 
 export default Profile; 
+
+
+

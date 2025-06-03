@@ -54,8 +54,9 @@
        const fetchStats = async () => {
          setLoading(true);
          try {
-           const users = await getUsers();
-           const adminCount = users.filter(user => user.roles.includes('ADMIN')).length;
+           const usersResponse = await getUsers();
+           const users = usersResponse.content;
+           const adminCount = users.filter(user => user.roles.some(role => role.name === 'ADMIN')).length;
            
            setStats({
              totalUsers: users.length,
@@ -79,7 +80,7 @@
              type="error"
              title="Ошибка загрузки"
              description={error}
-             variant="glass"
+             
            />
          </div>
        );
@@ -103,10 +104,7 @@
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
              {metrics.map((metric, index) => (
                <Card
-                 key={metric.label}
-                 variant="glass"
-                 hoverable
-                 className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 animate-in fade-in-0 slide-in-from-bottom-4"
+                 key={metric.label} className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 animate-in fade-in-0 slide-in-from-bottom-4"
                  style={{ animationDelay: `${index * 100}ms` }}
                >
                  <div className="p-6 space-y-4">
@@ -141,7 +139,7 @@
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
              {/* Performance Chart */}
              <Card
-               variant="glass"
+               
                className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-left-4 duration-700"
                style={{ animationDelay: '400ms' }}
              >
@@ -175,7 +173,7 @@
              
              {/* Attendance Chart */}
              <Card
-               variant="glass"
+               
                className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-right-4 duration-700"
                style={{ animationDelay: '500ms' }}
              >
@@ -210,7 +208,7 @@
            
            {/* Employee Table Section */}
            <Card
-             variant="glass"
+             
              className="backdrop-blur-xl bg-background/30 border border-divider/20 shadow-xl animate-in fade-in-0 slide-in-from-bottom-4 duration-700"
              style={{ animationDelay: '600ms' }}
            >
@@ -259,10 +257,8 @@
              style={{ animationDelay: '700ms' }}
            >
              <Button
-               variant="primary"
-               size="lg"
-               gradient
-               icon="solar:eye-bold"
+               color="primary"
+               size="lg" startContent={<Icon icon="solar:eye-bold" className="w-4 h-4" />}
                className="transition-all duration-300 hover:shadow-xl hover:shadow-primary/25"
              >
                View Full Details
@@ -271,16 +267,16 @@
              <Button
                variant="ghost"
                size="lg"
-               icon="solar:users-group-rounded-bold"
+               startContent={<Icon icon="solar:users-group-rounded-bold" className="w-4 h-4" />}
                className="border border-divider/30 hover:border-primary/50 transition-all duration-300"
              >
                All Employees
              </Button>
              
              <Button
-               variant="secondary"
+               color="secondary"
                size="lg"
-               icon="solar:export-bold"
+               startContent={<Icon icon="solar:export-bold" className="w-4 h-4" />}
                className="transition-all duration-300 hover:shadow-lg hover:shadow-secondary/20"
              >
                Export Data
@@ -292,3 +288,6 @@
    };
    
    export default Dashboard;
+
+
+

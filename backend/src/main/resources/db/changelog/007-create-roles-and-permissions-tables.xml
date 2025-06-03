@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Создание таблицы прав доступа -->
+    <changeSet id="007-create-permissions-table" author="crypto-tracker">
+        <createTable tableName="permissions">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="category" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Индексы для permissions -->
+        <createIndex tableName="permissions" indexName="idx_permission_name">
+            <column name="name"/>
+        </createIndex>
+        
+        <createIndex tableName="permissions" indexName="idx_permission_category">
+            <column name="category"/>
+        </createIndex>
+        
+        <createIndex tableName="permissions" indexName="idx_permission_level">
+            <column name="level"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Создание таблицы ролей -->
+    <changeSet id="007-create-roles-table" author="crypto-tracker">
+        <createTable tableName="roles">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="VARCHAR(255)"/>
+            <column name="priority" type="INTEGER" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValue="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Индексы для roles -->
+        <createIndex tableName="roles" indexName="idx_role_name">
+            <column name="name"/>
+        </createIndex>
+        
+        <createIndex tableName="roles" indexName="idx_role_priority">
+            <column name="priority"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Создание промежуточной таблицы role_permissions -->
+    <changeSet id="007-create-role-permissions-table" author="crypto-tracker">
+        <createTable tableName="role_permissions">
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="permission_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Составной первичный ключ -->
+        <addPrimaryKey tableName="role_permissions" columnNames="role_id,permission_id"/>
+
+        <!-- Внешние ключи -->
+        <addForeignKeyConstraint
+                baseTableName="role_permissions"
+                baseColumnNames="role_id"
+                referencedTableName="roles"
+                referencedColumnNames="id"
+                constraintName="fk_role_permissions_role_id"
+                onDelete="CASCADE"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="role_permissions"
+                baseColumnNames="permission_id"
+                referencedTableName="permissions"
+                referencedColumnNames="id"
+                constraintName="fk_role_permissions_permission_id"
+                onDelete="CASCADE"/>
+
+        <!-- Индексы -->
+        <createIndex tableName="role_permissions" indexName="idx_role_permissions_role_id">
+            <column name="role_id"/>
+        </createIndex>
+        
+        <createIndex tableName="role_permissions" indexName="idx_role_permissions_permission_id">
+            <column name="permission_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Удаление старой таблицы user_roles и создание новой -->
+    <changeSet id="007-recreate-user-roles-table" author="crypto-tracker">
+        <!-- Удаляем старую таблицу user_roles -->
+        <dropTable tableName="user_roles"/>
+        
+        <!-- Создаем новую таблицу user_roles с внешними ключами на roles -->
+        <createTable tableName="user_roles">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Составной первичный ключ -->
+        <addPrimaryKey tableName="user_roles" columnNames="user_id,role_id"/>
+
+        <!-- Внешние ключи -->
+        <addForeignKeyConstraint
+                baseTableName="user_roles"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_user_roles_user_id"
+                onDelete="CASCADE"/>
+                
+        <addForeignKeyConstraint
+                baseTableName="user_roles"
+                baseColumnNames="role_id"
+                referencedTableName="roles"
+                referencedColumnNames="id"
+                constraintName="fk_user_roles_role_id"
+                onDelete="CASCADE"/>
+
+        <!-- Индексы -->
+        <createIndex tableName="user_roles" indexName="idx_user_roles_user_id">
+            <column name="user_id"/>
+        </createIndex>
+        
+        <createIndex tableName="user_roles" indexName="idx_user_roles_role_id">
+            <column name="role_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Вставка базовых прав доступа -->
+    <changeSet id="007-insert-basic-permissions" author="crypto-tracker">
+        <!-- Права для управления пользователями -->
+        <insert tableName="permissions">
+            <column name="name" value="USER_READ"/>
+            <column name="description" value="Просмотр информации о пользователях"/>
+            <column name="category" value="USER_MANAGEMENT"/>
+            <column name="level" value="READ"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+        
+        <insert tableName="permissions">
+            <column name="name" value="USER_WRITE"/>
+            <column name="description" value="Создание и редактирование пользователей"/>
+            <column name="category" value="USER_MANAGEMENT"/>
+            <column name="level" value="WRITE"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+        
+        <insert tableName="permissions">
+            <column name="name" value="USER_DELETE"/>
+            <column name="description" value="Удаление пользователей"/>
+            <column name="category" value="USER_MANAGEMENT"/>
+            <column name="level" value="DELETE"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- Права для управления криптовалютами -->
+        <insert tableName="permissions">
+            <column name="name" value="COIN_READ"/>
+            <column name="description" value="Просмотр информации о криптовалютах"/>
+            <column name="category" value="COIN_MANAGEMENT"/>
+            <column name="level" value="READ"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+        
+        <insert tableName="permissions">
+            <column name="name" value="COIN_WRITE"/>
+            <column name="description" value="Создание и редактирование криптовалют"/>
+            <column name="category" value="COIN_MANAGEMENT"/>
+            <column name="level" value="WRITE"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- Права для управления биржами -->
+        <insert tableName="permissions">
+            <column name="name" value="EXCHANGE_READ"/>
+            <column name="description" value="Просмотр информации о биржах"/>
+            <column name="category" value="EXCHANGE_MANAGEMENT"/>
+            <column name="level" value="READ"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+        
+        <insert tableName="permissions">
+            <column name="name" value="EXCHANGE_WRITE"/>
+            <column name="description" value="Создание и редактирование бирж"/>
+            <column name="category" value="EXCHANGE_MANAGEMENT"/>
+            <column name="level" value="WRITE"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- Права для системных настроек -->
+        <insert tableName="permissions">
+            <column name="name" value="SYSTEM_ADMIN"/>
+            <column name="description" value="Полный доступ к системным настройкам"/>
+            <column name="category" value="SYSTEM_SETTINGS"/>
+            <column name="level" value="ADMIN"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- Права для инструментов -->
+        <insert tableName="permissions">
+            <column name="name" value="TOOLS_BASIC"/>
+            <column name="description" value="Доступ к базовым инструментам"/>
+            <column name="category" value="TOOLS"/>
+            <column name="level" value="READ"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+        
+        <insert tableName="permissions">
+            <column name="name" value="TOOLS_PREMIUM"/>
+            <column name="description" value="Доступ к премиум инструментам"/>
+            <column name="category" value="TOOLS"/>
+            <column name="level" value="WRITE"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+    </changeSet>
+
+    <!-- Вставка базовых ролей -->
+    <changeSet id="007-insert-basic-roles" author="crypto-tracker">
+        <!-- Роль USER (id: 1) -->
+        <insert tableName="roles">
+            <column name="id" value="1"/>
+            <column name="name" value="USER"/>
+            <column name="description" value="Базовая роль для всех зарегистрированных пользователей"/>
+            <column name="priority" value="1"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- Роль PREMIUM (id: 2) -->
+        <insert tableName="roles">
+            <column name="id" value="2"/>
+            <column name="name" value="PREMIUM"/>
+            <column name="description" value="Роль для платных пользователей с доступом к премиум инструментам"/>
+            <column name="priority" value="2"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- Роль MODERATOR (id: 3) -->
+        <insert tableName="roles">
+            <column name="id" value="3"/>
+            <column name="name" value="MODERATOR"/>
+            <column name="description" value="Роль модератора с правами управления пользователями"/>
+            <column name="priority" value="3"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+
+        <!-- Роль ADMIN (id: 4) -->
+        <insert tableName="roles">
+            <column name="id" value="4"/>
+            <column name="name" value="ADMIN"/>
+            <column name="description" value="Роль администратора с полными правами"/>
+            <column name="priority" value="4"/>
+            <column name="created_at" valueDate="now()"/>
+            <column name="updated_at" valueDate="now()"/>
+        </insert>
+    </changeSet>
+
+    <!-- Назначение прав ролям -->
+    <changeSet id="007-assign-permissions-to-roles" author="crypto-tracker">
+        <!-- Права для роли USER -->
+        <insert tableName="role_permissions">
+            <column name="role_id" value="1"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'COIN_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="1"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'EXCHANGE_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="1"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'TOOLS_BASIC')"/>
+        </insert>
+
+        <!-- Права для роли PREMIUM (наследует от USER + премиум инструменты) -->
+        <insert tableName="role_permissions">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'COIN_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'EXCHANGE_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'TOOLS_BASIC')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="2"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'TOOLS_PREMIUM')"/>
+        </insert>
+
+        <!-- Права для роли MODERATOR -->
+        <insert tableName="role_permissions">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'USER_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'USER_WRITE')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'COIN_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'COIN_WRITE')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'EXCHANGE_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'TOOLS_BASIC')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="3"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'TOOLS_PREMIUM')"/>
+        </insert>
+
+        <!-- Права для роли ADMIN (все права) -->
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'USER_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'USER_WRITE')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'USER_DELETE')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'COIN_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'COIN_WRITE')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'EXCHANGE_READ')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'EXCHANGE_WRITE')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'SYSTEM_ADMIN')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'TOOLS_BASIC')"/>
+        </insert>
+        
+        <insert tableName="role_permissions">
+            <column name="role_id" value="4"/>
+            <column name="permission_id" valueComputed="(SELECT id FROM permissions WHERE name = 'TOOLS_PREMIUM')"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog> 

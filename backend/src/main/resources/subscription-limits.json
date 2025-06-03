@@ -1,0 +1,243 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2024-01-15T10:00:00Z",
+  "hot_reload_enabled": true,
+  
+  "subscription_plans": {
+    "FREE": {
+      "name": "Free Plan",
+      "price": 0.0,
+      "currency": "USD",
+      "billing_cycle": "monthly",
+      "trial_days": 0,
+      "refund_days": 0,
+      "features": [
+        "Basic Twitter tracking",
+        "Limited alerts",
+        "Community support"
+      ],
+      "limits": {
+        "twitter_tracker": {
+          "max_accounts": 3,
+          "max_alerts_per_day": 10,
+          "historical_data_days": 7,
+          "sentiment_analysis": false,
+          "categorization": false,
+          "real_time_notifications": true,
+          "email_alerts": false,
+          "advanced_filters": false,
+          "analytics_dashboard": false
+        },
+        "telegram_tracker": {
+          "max_channels": 0,
+          "max_alerts_per_day": 0,
+          "historical_data_days": 0,
+          "ocr_enabled": false,
+          "audio_transcription": false,
+          "translation_enabled": false,
+          "sentiment_analysis": false,
+          "advanced_filters": false,
+          "channel_analytics": false
+        },
+        "market_analytics": {
+          "price_listing_tracking": false,
+          "volume_tracking": false,
+          "liquidity_tracking": false,
+          "detection_analytics": false,
+          "max_tracked_contracts": 0,
+          "alert_frequency_minutes": 60,
+          "historical_data_days": 0,
+          "advanced_charts": false,
+          "custom_indicators": false,
+          "portfolio_tracking": false
+        },
+        "smart_money_tracking": {
+          "enabled": false,
+          "max_wallets": 0,
+          "pattern_analysis": false,
+          "flow_analysis": false,
+          "correlation_analysis": false,
+          "portfolio_analysis": false,
+          "historical_data_days": 0,
+          "copy_trading_alerts": false,
+          "whale_movement_alerts": false,
+          "early_detection": false
+        },
+        "general": {
+          "api_requests_per_day": 1000,
+          "historical_data_retention_days": 7,
+          "concurrent_connections": 2,
+          "export_data": false,
+          "custom_filters": false,
+          "advanced_search": false,
+          "priority_support": false,
+          "ads_enabled": true
+        }
+      }
+    },
+    "PREMIUM": {
+      "name": "Premium Plan",
+      "price": 29.99,
+      "currency": "USD",
+      "billing_cycle": "monthly",
+      "trial_days": 7,
+      "refund_days": 30,
+      "features": [
+        "Unlimited Twitter tracking",
+        "Telegram channel monitoring",
+        "Advanced market analytics",
+        "Smart money tracking",
+        "Real-time notifications",
+        "Priority support",
+        "Advanced analytics"
+      ],
+      "limits": {
+        "twitter_tracker": {
+          "max_accounts": 50,
+          "max_alerts_per_day": 1000,
+          "historical_data_days": 90,
+          "sentiment_analysis": true,
+          "categorization": true,
+          "real_time_notifications": true,
+          "email_alerts": true,
+          "advanced_filters": true,
+          "analytics_dashboard": true
+        },
+        "telegram_tracker": {
+          "max_channels": 25,
+          "max_alerts_per_day": 500,
+          "historical_data_days": 60,
+          "ocr_enabled": true,
+          "audio_transcription": true,
+          "translation_enabled": true,
+          "sentiment_analysis": true,
+          "advanced_filters": true,
+          "channel_analytics": true
+        },
+        "market_analytics": {
+          "price_listing_tracking": true,
+          "volume_tracking": true,
+          "liquidity_tracking": true,
+          "detection_analytics": true,
+          "max_tracked_contracts": 100,
+          "alert_frequency_minutes": 5,
+          "historical_data_days": 180,
+          "advanced_charts": true,
+          "custom_indicators": true,
+          "portfolio_tracking": true
+        },
+        "smart_money_tracking": {
+          "enabled": true,
+          "max_wallets": 50,
+          "pattern_analysis": true,
+          "flow_analysis": true,
+          "correlation_analysis": true,
+          "portfolio_analysis": true,
+          "historical_data_days": 365,
+          "copy_trading_alerts": true,
+          "whale_movement_alerts": true,
+          "early_detection": true
+        },
+        "general": {
+          "api_requests_per_day": 50000,
+          "historical_data_retention_days": 365,
+          "concurrent_connections": 10,
+          "export_data": true,
+          "custom_filters": true,
+          "advanced_search": true,
+          "priority_support": true,
+          "ads_enabled": false
+        }
+      }
+    }
+  },
+  
+  "payment_settings": {
+    "accepted_currencies": ["USD", "EUR", "BTC", "ETH"],
+    "payment_provider": "stripe",
+    "trial_period_days": 7,
+    "refund_period_days": 30,
+    "auto_renewal": true,
+    "grace_period_days": 3
+  },
+  
+  "upgrade_prompts": {
+    "twitter_limit_reached": {
+      "message": "Вы достигли лимита отслеживания Twitter аккаунтов для бесплатного плана. Обновитесь до Premium для отслеживания до 50 аккаунтов!",
+      "action": "upgrade_to_premium"
+    },
+    "telegram_not_available": {
+      "message": "Отслеживание Telegram каналов доступно только в Premium плане. Получите полный доступ ко всем функциям!",
+      "action": "upgrade_to_premium"
+    },
+    "alert_limit_reached": {
+      "message": "Вы исчерпали дневной лимит уведомлений. Premium план предоставляет до 1000 уведомлений в день!",
+      "action": "upgrade_to_premium"
+    },
+    "analytics_not_available": {
+      "message": "Расширенная аналитика и настраиваемые фильтры доступны только в Premium плане.",
+      "action": "upgrade_to_premium"
+    }
+  },
+  
+  "notification_settings": {
+    "rate_limits": {
+      "free_daily_notifications": 10,
+      "pro_daily_notifications": 1000,
+      "email_cooldown_minutes": 15,
+      "browser_notification_cooldown_seconds": 30
+    },
+    "channels": {
+      "email": true,
+      "browser": true,
+      "webhook": true,
+      "telegram": false
+    }
+  },
+  
+  "system_settings": {
+    "data_retention": {
+      "free_plan_days": 7,
+      "pro_plan_days": 365,
+      "logs_retention_days": 90
+    },
+    "performance": {
+      "cache_ttl_seconds": 300,
+      "batch_processing_size": 100,
+      "max_concurrent_requests": 50
+    },
+    "security": {
+      "rate_limit_window_minutes": 15,
+      "max_failed_login_attempts": 5,
+      "session_timeout_hours": 24
+    }
+  },
+  
+  "module_availability": {
+    "twitter_tracker": {
+      "free": true,
+      "premium": true,
+      "status": "active"
+    },
+    "telegram_tracker": {
+      "free": false,
+      "premium": true,
+      "status": "active"
+    },
+    "market_analytics": {
+      "free": false,
+      "premium": true,
+      "status": "active"
+    },
+    "smart_money_tracking": {
+      "free": false,
+      "premium": true,
+      "status": "active"
+    },
+    "portfolio_management": {
+      "free": false,
+      "premium": true,
+      "status": "development"
+    }
+  }
+} 
