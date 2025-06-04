@@ -19,7 +19,8 @@ const fetchCsrfToken = async () => {
     const response = await axios.get(`${API_URL}/auth/csrf`, {
       withCredentials: true
     });
-    csrfToken = response.data.token;
+    // Backend возвращает ApiResponse с data.token
+    csrfToken = response.data.data?.token || response.data.token;
     return csrfToken;
   } catch (error) {
     console.warn('Failed to fetch CSRF token:', error);
