@@ -6,17 +6,11 @@ import {
   Button, 
   Chip, 
   Divider,
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow
+  Spinner
 } from '@nextui-org/react';
 import { Icon } from '@iconify/react';
 import { subscriptionApi } from '../../services/api';
-import type { SubscriptionPlan, SubscriptionFeatureMatrix } from '../../types/api';
+import type { SubscriptionPlan } from '../../types/api';
 
 interface SubscriptionPlansProps {
   onPlanSelect?: (plan: SubscriptionPlan) => void;
@@ -28,7 +22,6 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
   currentPlan 
 }) => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [featureMatrix, setFeatureMatrix] = useState<SubscriptionFeatureMatrix | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,12 +29,8 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [plansResponse, matrixResponse] = await Promise.all([
-          subscriptionApi.getPlans(),
-          subscriptionApi.getFeatureMatrix()
-        ]);
+        const plansResponse = await subscriptionApi.getPlans();
         setPlans(plansResponse);
-        setFeatureMatrix(matrixResponse);
       } catch (err) {
         setError('Ошибка загрузки тарифных планов');
         console.error('Error fetching subscription plans:', err);
@@ -59,21 +48,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
     return `${price} ${currency}/${period}`;
   };
 
-  const renderFeatureValue = (value: string | number | boolean) => {
-    if (typeof value === 'boolean') {
-      return value ? (
-        <Icon icon="material-symbols:check" className="h-5 w-5 text-success" />
-      ) : (
-        <Icon icon="material-symbols:close" className="h-5 w-5 text-danger" />
-      );
-    }
-    
-    if (typeof value === 'number') {
-      return value === -1 ? '∞' : value.toString();
-    }
-    
-    return value.toString();
-  };
+
 
   if (loading) {
     return (
@@ -163,40 +138,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
         })}
       </div>
 
-      {/* Feature Comparison Matrix */}
-      {featureMatrix && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold">Сравнение возможностей</h3>
-          <Card>
-            <CardBody>
-              <Table aria-label="Сравнение тарифных планов">
-                <TableHeader>
-                  <TableColumn>Функция</TableColumn>
-                  <TableColumn>FREE</TableColumn>
-                  <TableColumn>PREMIUM</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {Object.entries(featureMatrix).map(([feature, values]) => (
-                    <TableRow key={feature}>
-                      <TableCell className="font-medium">{feature}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-center">
-                          {renderFeatureValue(values.free)}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex justify-center">
-                          {renderFeatureValue(values.premium)}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardBody>
-          </Card>
-        </div>
-      )}
+
     </div>
   );
 }; 

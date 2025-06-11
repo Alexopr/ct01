@@ -14,6 +14,16 @@ services:
       - SPRING_DATASOURCE_PASSWORD=root
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
+      # Telegram bot will use default value from EnvironmentConfig
+      # - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-crypto_tracker_bot}
+      - BINANCE_API_KEY=${BINANCE_API_KEY:-}
+      - BINANCE_SECRET_KEY=${BINANCE_SECRET_KEY:-}
+      - COINBASE_API_KEY=${COINBASE_API_KEY:-}
+      - COINBASE_SECRET_KEY=${COINBASE_SECRET_KEY:-}
+      # Добавляем CORS настройки
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://frontend:80
+      - SPRING_PROFILES_ACTIVE=dev
     networks:
       - app-network
 
@@ -41,6 +51,11 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
+      args:
+        # Для Docker network используем имя сервиса
+        - VITE_API_URL=http://localhost:8080/api
+        - VITE_WS_URL=ws://localhost:8080/ws
+        - VITE_TELEGRAM_BOT_NAME=alg_gor_bot
     ports:
       - "3000:80"
     depends_on:

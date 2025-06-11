@@ -2,21 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Alert } from "./ui";
 import { Select, SelectItem, Switch, Chip, Button, Input } from "@nextui-org/react";
 import { Icon } from '@iconify/react';
-
-interface CryptoCoin {
-  symbol: string;
-  name: string;
-  icon: string;
-  exchangeUrl: string;
-}
-
-interface TickerSettings {
-  enabled: boolean;
-  selectedCoins: string[];
-  exchange: string;
-  animationSpeed: string;
-  showChangePercent: boolean;
-}
+import { apiService } from '../services/api';
+import type { CryptoTickerSettings as TickerSettings, Coin } from '../types/api';
 
 const CryptoTickerSettings: React.FC = () => {
   const [settings, setSettings] = useState<TickerSettings>({
@@ -27,25 +14,12 @@ const CryptoTickerSettings: React.FC = () => {
     showChangePercent: true,
   });
 
-  const availableCoins: CryptoCoin[] = [
-    { symbol: 'BTC', name: 'Bitcoin', icon: 'logos:bitcoin', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/BTC/USDT' },
-    { symbol: 'ETH', name: 'Ethereum', icon: 'logos:ethereum', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/ETH/USDT' },
-    { symbol: 'SOL', name: 'Solana', icon: 'logos:solana', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/SOL/USDT' },
-    { symbol: 'ADA', name: 'Cardano', icon: 'logos:cardano', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/ADA/USDT' },
-    { symbol: 'DOT', name: 'Polkadot', icon: 'logos:polkadot', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/DOT/USDT' },
-    { symbol: 'AVAX', name: 'Avalanche', icon: 'logos:avalanche', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/AVAX/USDT' },
-    { symbol: 'MATIC', name: 'Polygon', icon: 'logos:polygon', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/MATIC/USDT' },
-    { symbol: 'LINK', name: 'Chainlink', icon: 'logos:chainlink', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/LINK/USDT' },
-    { symbol: 'UNI', name: 'Uniswap', icon: 'logos:uniswap', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/UNI/USDT' },
-    { symbol: 'ATOM', name: 'Cosmos', icon: 'logos:cosmos', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/ATOM/USDT' },
-    { symbol: 'LTC', name: 'Litecoin', icon: 'logos:litecoin', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/LTC/USDT' },
-    { symbol: 'BCH', name: 'Bitcoin Cash', icon: 'logos:bitcoin-cash', exchangeUrl: 'https://www.bybit.com/en-US/trade/spot/BCH/USDT' },
-  ];
-
+  const [availableCoins, setAvailableCoins] = useState<Coin[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingCoins, setLoadingCoins] = useState(true);
 
   const exchanges = [
     { key: 'bybit', label: 'Bybit', icon: 'simple-icons:bybit' },
@@ -58,6 +32,31 @@ const CryptoTickerSettings: React.FC = () => {
     { key: 'medium', label: 'Нормально' },
     { key: 'fast', label: 'Быстро' },
   ];
+
+  // Load available coins from API
+  useEffect(() => {
+    const loadAvailableCoins = async () => {
+      try {
+        setLoadingCoins(true);
+        const coins = await apiService.getActiveCoins();
+        setAvailableCoins(coins);
+      } catch (error) {
+        console.error('Error loading available coins:', error);
+        // Fallback to predefined list
+        setAvailableCoins([
+          { id: 1, symbol: 'BTC', name: 'Bitcoin', isActive: true } as Coin,
+          { id: 2, symbol: 'ETH', name: 'Ethereum', isActive: true } as Coin,
+          { id: 3, symbol: 'SOL', name: 'Solana', isActive: true } as Coin,
+          { id: 4, symbol: 'ADA', name: 'Cardano', isActive: true } as Coin,
+          { id: 5, symbol: 'DOT', name: 'Polkadot', isActive: true } as Coin,
+        ]);
+      } finally {
+        setLoadingCoins(false);
+      }
+    };
+
+    loadAvailableCoins();
+  }, []);
 
   const filteredCoins = availableCoins.filter(coin =>
     coin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,16 +94,20 @@ const CryptoTickerSettings: React.FC = () => {
     setError(null);
 
     try {
-      // TODO: Реализовать API вызов для сохранения настроек
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Save settings via API
+      await apiService.updateSettings('crypto-ticker', settings);
       
-      // Сохранить в localStorage для демонстрации
+      // Also save in localStorage for immediate frontend usage
       localStorage.setItem('cryptoTickerSettings', JSON.stringify(settings));
       
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       setError(err.message || 'Ошибка сохранения настроек');
+      
+      // Fallback to localStorage
+      localStorage.setItem('cryptoTickerSettings', JSON.stringify(settings));
+      console.warn('Saved to localStorage as fallback');
     } finally {
       setLoading(false);
     }
@@ -120,18 +123,68 @@ const CryptoTickerSettings: React.FC = () => {
     });
   };
 
-  // Загружаем настройки из localStorage при монтировании
+  // Load settings from API and localStorage
   useEffect(() => {
-    const savedSettings = localStorage.getItem('cryptoTickerSettings');
-    if (savedSettings) {
+    const loadSettings = async () => {
       try {
-        const parsed = JSON.parse(savedSettings);
-        setSettings(parsed);
-      } catch (err) {
-        console.error('Ошибка загрузки настроек тикера:', err);
+        // Try to load from API first
+        const apiSettings = await apiService.getSettingsByCategory('crypto-ticker');
+        if (apiSettings) {
+          // Validate and merge with defaults to ensure all required fields are present
+          const validatedSettings: TickerSettings = {
+            enabled: apiSettings.enabled ?? true,
+            selectedCoins: Array.isArray(apiSettings.selectedCoins) ? apiSettings.selectedCoins : ['BTC', 'ETH', 'SOL'],
+            exchange: apiSettings.exchange ?? 'bybit',
+            animationSpeed: apiSettings.animationSpeed ?? 'medium',
+            showChangePercent: apiSettings.showChangePercent ?? true,
+          };
+          setSettings(validatedSettings);
+          return;
+        }
+      } catch (error) {
+        console.warn('Failed to load settings from API, falling back to localStorage');
       }
-    }
+
+      // Fallback to localStorage
+      const savedSettings = localStorage.getItem('cryptoTickerSettings');
+      if (savedSettings) {
+        try {
+          const parsed = JSON.parse(savedSettings);
+          // Validate parsed settings and merge with defaults
+          const validatedSettings: TickerSettings = {
+            enabled: parsed.enabled ?? true,
+            selectedCoins: Array.isArray(parsed.selectedCoins) ? parsed.selectedCoins : ['BTC', 'ETH', 'SOL'],
+            exchange: parsed.exchange ?? 'bybit',
+            animationSpeed: parsed.animationSpeed ?? 'medium',
+            showChangePercent: parsed.showChangePercent ?? true,
+          };
+          setSettings(validatedSettings);
+        } catch (err) {
+          console.error('Ошибка загрузки настроек тикера:', err);
+        }
+      }
+    };
+
+    loadSettings();
   }, []);
+
+  const getCoinIcon = (symbol: string): string => {
+    const coinIcons: Record<string, string> = {
+      'BTC': 'logos:bitcoin',
+      'ETH': 'logos:ethereum',
+      'SOL': 'logos:solana',
+      'ADA': 'logos:cardano',
+      'DOT': 'logos:polkadot',
+      'AVAX': 'logos:avalanche',
+      'MATIC': 'logos:polygon',
+      'LINK': 'logos:chainlink',
+      'UNI': 'logos:uniswap',
+      'ATOM': 'logos:cosmos',
+      'LTC': 'logos:litecoin',
+      'BCH': 'logos:bitcoin-cash'
+    };
+    return coinIcons[symbol] || 'mdi:currency-btc';
+  };
 
   return (
     <div className="space-y-6">
@@ -143,6 +196,23 @@ const CryptoTickerSettings: React.FC = () => {
           Настройки криптотикера
         </h3>
       </div>
+
+      {/* Success/Error Alerts */}
+      {success && (
+        <Alert
+          type="success"
+          title="Настройки сохранены"
+          description="Настройки криптотикера успешно обновлены"
+        />
+      )}
+
+      {error && (
+        <Alert
+          type="error"
+          title="Ошибка"
+          description={error}
+        />
+      )}
 
       {/* Основные настройки */}
       <div className="space-y-4">
@@ -205,115 +275,98 @@ const CryptoTickerSettings: React.FC = () => {
         </div>
       </div>
 
-      {/* Выбранные монеты */}
+      {/* Выбор монет */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h4 className="text-medium font-semibold text-foreground">
-            Выбранные монеты ({settings.selectedCoins.length}/10)
-          </h4>
-          <Button
-            size="sm"
-            variant="bordered"
-            onPress={resetToDefaults}
-            startContent={<Icon icon="solar:restart-bold" className="w-4 h-4" />}
-          >
-            Сбросить
-          </Button>
+        <div className="space-y-2">
+          <h4 className="text-lg font-semibold text-foreground">Выбранные монеты</h4>
+          <p className="text-sm text-foreground-500">
+            Выберите до 10 монет для отслеживания ({settings.selectedCoins.length}/10)
+          </p>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {settings.selectedCoins.map((symbol) => {
-            const coin = availableCoins.find(c => c.symbol === symbol);
-            return (
-              <Chip
-                key={symbol}
-                onClose={() => handleRemoveCoin(symbol)}
-                variant="flat"
-                color="primary"
-                startContent={
-                  <Icon icon={coin?.icon || 'solar:question-circle-bold'} className="w-4 h-4" />
-                }
-              >
-                {symbol}
-              </Chip>
-            );
-          })}
-        </div>
-      </div>
+        {/* Выбранные монеты */}
+        {settings.selectedCoins.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {settings.selectedCoins.map((symbol) => {
+              const coin = availableCoins.find(c => c.symbol === symbol);
+              return (
+                <Chip
+                  key={symbol}
+                  onClose={() => handleRemoveCoin(symbol)}
+                  variant="flat"
+                  color="primary"
+                  startContent={<Icon icon={getCoinIcon(symbol)} className="w-4 h-4" />}
+                >
+                  {symbol} {coin && `(${coin.name})`}
+                </Chip>
+              );
+            })}
+          </div>
+        )}
 
-      {/* Поиск и добавление монет */}
-      <div className="space-y-4">
-        <h4 className="text-medium font-semibold text-foreground">Добавить монеты</h4>
-        
+        {/* Поиск монет */}
         <Input
-          label="Поиск монет"
+          placeholder="Поиск монет..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          variant="bordered"
+          onValueChange={setSearchQuery}
           startContent={<Icon icon="solar:magnifer-bold" className="w-4 h-4" />}
-          placeholder="Введите название или символ монеты..."
+          variant="bordered"
+          disabled={loadingCoins}
         />
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-64 overflow-y-auto">
-          {filteredCoins.map((coin) => {
-            const isSelected = settings.selectedCoins.includes(coin.symbol);
-            const canAdd = settings.selectedCoins.length < 10;
-
-            return (
+        {/* Доступные монеты */}
+        {loadingCoins ? (
+          <div className="flex justify-center py-4">
+            <div className="flex items-center gap-2">
+              <Icon icon="solar:refresh-circle-bold" className="w-4 h-4 animate-spin" />
+              <span className="text-sm text-foreground-500">Загрузка монет...</span>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-64 overflow-y-auto">
+            {filteredCoins.map((coin) => (
               <Button
-                key={coin.symbol}
+                key={coin.id}
+                variant={settings.selectedCoins.includes(coin.symbol) ? "solid" : "bordered"}
+                color={settings.selectedCoins.includes(coin.symbol) ? "primary" : "default"}
                 size="sm"
-                variant={isSelected ? "solid" : "bordered"}
-                color={isSelected ? "primary" : "default"}
-                disabled={isSelected || !canAdd}
+                startContent={<Icon icon={getCoinIcon(coin.symbol)} className="w-4 h-4" />}
                 onPress={() => handleAddCoin(coin.symbol)}
-                startContent={
-                  <Icon icon={coin.icon} className="w-4 h-4" />
-                }
-                fullWidth
+                disabled={settings.selectedCoins.includes(coin.symbol) || settings.selectedCoins.length >= 10}
+                className="justify-start"
               >
-                <div className="flex flex-col items-start text-left">
-                  <span className="font-medium">{coin.symbol}</span>
-                  <span className="text-xs opacity-70">{coin.name}</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-xs font-medium">{coin.symbol}</span>
+                  <span className="text-xs text-foreground-500 truncate max-w-20">{coin.name}</span>
                 </div>
               </Button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Кнопка сохранения */}
-      <div className="flex justify-end pt-4">
+      {/* Действия */}
+      <div className="flex gap-3 pt-4">
         <Button
-          variant="solid"
           color="primary"
-          size="lg"
-          disabled={loading}
           onPress={handleSaveSettings}
-          startContent={<Icon icon="solar:check-circle-bold" className="w-4 h-4" />}
+          disabled={loading}
+          startContent={loading ? 
+            <Icon icon="solar:refresh-circle-bold" className="w-4 h-4 animate-spin" /> :
+            <Icon icon="solar:diskette-bold" className="w-4 h-4" />
+          }
         >
           {loading ? 'Сохранение...' : 'Сохранить настройки'}
         </Button>
-      </div>
 
-      {/* Уведомления */}
-      {success && (
-        <Alert
-          type="success"
-          title="Настройки сохранены"
-          description="Настройки криптотикера успешно обновлены"
-          variant="glass"
-        />
-      )}
-      
-      {error && (
-        <Alert
-          type="error"
-          title="Ошибка"
-          description={error}
-          variant="glass"
-        />
-      )}
+        <Button
+          variant="bordered"
+          onPress={resetToDefaults}
+          startContent={<Icon icon="solar:refresh-bold" className="w-4 h-4" />}
+        >
+          Сброс к умолчанию
+        </Button>
+      </div>
     </div>
   );
 };

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Add missing quote_currency column to price_history table -->
+    <changeSet id="009-add-quote-currency-to-price-history" author="api-sync-fix">
+        <comment>Add quote_currency column to price_history table to match JPA entity</comment>
+        
+        <addColumn tableName="price_history">
+            <column name="quote_currency" type="VARCHAR(10)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <!-- Add index for quote_currency for better query performance -->
+        <createIndex tableName="price_history" indexName="idx_price_quote_currency">
+            <column name="quote_currency"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

@@ -1,0 +1,98 @@
+@startuml
+!theme plain
+title CT.01 - Cryptocurrency Tracking System Architecture
+
+package "Presentation Layer" {
+  [AuthController] 
+  [CoinDataController]
+  [ExchangeController]
+  [SubscriptionController]
+  [TrackedCoinController]
+  [PriceWebSocketController]
+}
+
+package "Security Layer" {
+  [SecurityConfig]
+  [RateLimitFilter]
+  [RateLimitService]
+  [CustomUserDetailsService]
+}
+
+package "Business Logic Layer" {
+  [UserService]
+  [CoinService]
+  [ExchangeService] 
+  [SubscriptionService]
+  [PriceUpdateService]
+  [TelegramAuthService]
+  [CacheService]
+}
+
+package "Exchange Adapters" {
+  [AbstractExchangeAdapter]
+  [BinanceAdapter]
+  [BybitAdapter] 
+  [OkxAdapter]
+}
+
+package "Data Access Layer" {
+  [UserRepository]
+  [CoinRepository]
+  [ExchangeRepository]
+  [SubscriptionRepository]
+  [PriceHistoryRepository]
+}
+
+package "Entities" {
+  [User]
+  [Coin]
+  [Exchange]
+  [PriceHistory]
+  [UserSubscription]
+  [Role]
+}
+
+package "External Systems" {
+  database "PostgreSQL" {
+    [Main Database]
+  }
+  database "Redis" {
+    [Cache & Sessions]
+  }
+  cloud "Exchange APIs" {
+    [Binance API]
+    [Bybit API]
+    [OKX API]
+  }
+}
+
+' Dependencies
+[AuthController] --> [UserService]
+[CoinDataController] --> [CoinService]
+[ExchangeController] --> [ExchangeService]
+[SubscriptionController] --> [SubscriptionService]
+
+[SecurityConfig] --> [CustomUserDetailsService]
+[RateLimitFilter] --> [RateLimitService]
+
+[UserService] --> [UserRepository]
+[CoinService] --> [CoinRepository]
+[ExchangeService] --> [ExchangeRepository]
+[PriceUpdateService] --> [PriceHistoryRepository]
+
+[ExchangeService] --> [BinanceAdapter]
+[ExchangeService] --> [BybitAdapter]
+[ExchangeService] --> [OkxAdapter]
+
+[BinanceAdapter] --> [Binance API]
+[BybitAdapter] --> [Bybit API] 
+[OkxAdapter] --> [OKX API]
+
+[UserRepository] --> [Main Database]
+[CoinRepository] --> [Main Database]
+[ExchangeRepository] --> [Main Database]
+
+[CacheService] --> [Cache & Sessions]
+[TelegramAuthService] --> [Cache & Sessions]
+
+@enduml 

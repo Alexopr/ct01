@@ -353,6 +353,75 @@ export interface PaymentRecord {
   transactionId?: string;
 }
 
+// Cryptocurrency Ticker Types
+export interface CryptoTickerSettings {
+  enabled: boolean;
+  selectedCoins: string[];
+  exchange: string;
+  animationSpeed: 'slow' | 'medium' | 'fast';
+  showChangePercent: boolean;
+}
+
+export interface CryptoTickerData {
+  symbol: string;
+  name: string;
+  price: number;
+  change24h: number;
+  volume24h?: number;
+  exchange: string;
+  timestamp: number;
+  icon?: string;
+  exchangeUrl?: string;
+}
+
+// Price Data Types
+export interface PriceData {
+  symbol: string;
+  price: number;
+  volume?: number;
+  change24h?: number;
+  changePercent24h?: number;
+  high24h?: number;
+  low24h?: number;
+  exchange: string;
+  timestamp: number;
+  marketCap?: number;
+}
+
+export interface PriceStatistics {
+  symbol: string;
+  exchange?: string;
+  currentPrice: number;
+  high24h: number;
+  low24h: number;
+  change24h: number;
+  changePercent24h: number;
+  volume24h: number;
+  priceHistory: PriceHistoryPoint[];
+}
+
+export interface PriceHistoryPoint {
+  timestamp: number;
+  price: number;
+  volume?: number;
+}
+
+// WebSocket Types for Price Updates
+export interface PriceUpdateEvent {
+  type: 'price_update';
+  symbol: string;
+  data: PriceData;
+}
+
+export interface WebSocketConnectionStats {
+  totalConnections: number;
+  totalSubscriptions: number;
+  subscriptionsBySymbol: Record<string, number>;
+  uptime: number;
+  messagesReceived: number;
+  messagesSent: number;
+}
+
 export interface SubscriptionFeatureMatrix {
   [feature: string]: {
     free: string | number | boolean;

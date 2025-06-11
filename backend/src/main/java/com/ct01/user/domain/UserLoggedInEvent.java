@@ -1,0 +1,29 @@
+package com.ct01.user.domain;
+
+import com.ct01.core.domain.DomainEvent;
+import com.ct01.core.domain.UserId;
+import java.time.LocalDateTime;
+
+/**
+ * Событие входа пользователя в систему
+ */
+public record UserLoggedInEvent(
+    UserId userId,
+    String username,
+    LocalDateTime occurredAt
+) implements DomainEvent {
+    
+    public UserLoggedInEvent(UserId userId, String username) {
+        this(userId, username, LocalDateTime.now());
+    }
+    
+    @Override
+    public LocalDateTime getOccurredAt() {
+        return occurredAt;
+    }
+    
+    @Override
+    public Object getAggregateId() {
+        return userId;
+    }
+} 

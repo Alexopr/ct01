@@ -16,7 +16,7 @@ let csrfToken: string | null = null;
 // Функция для получения CSRF токена
 const fetchCsrfToken = async () => {
   try {
-    const response = await axios.get(`${API_URL}/auth/csrf`, {
+    const response = await axios.get(`${API_URL}/v1/auth/csrf`, {
       withCredentials: true
     });
     // Backend возвращает ApiResponse с data.token

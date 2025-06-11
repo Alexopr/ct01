@@ -1,58 +1,244 @@
-# Tech Context
+# Technical Context - Cryptocurrency Dashboard
 
-## Technologies Used
-- **Backend**: Java 17, Spring Boot 3.x, PostgreSQL, Redis, Spring Security, Spring Data JPA, WebSocket
-- **Crypto APIs**: Bybit REST/WebSocket, Binance API, OKX API с rate limiting
-- **Authentication**: Telegram Login Widget, JWT HttpOnly Secure Cookies
-- **Frontend**: React 18, TypeScript, Vite, NextUI (migrated from Material-UI), React Router v6
-- **Styling**: NextUI theming system, Tailwind CSS, Custom dark theme, Glassmorphism effects
-- **Real-time**: WebSocket, Server-Sent Events, Push Notifications API
-- **Build Tools**: Maven (backend), Vite (frontend), Docker Compose
-- **Code Quality**: ESLint, Prettier, SonarLint, Comprehensive linting rules
+## 🛠 Технологический стек
 
-## Development Setup
-- **Backend**: Maven wrapper, application.properties, Flyway migrations, JUnit 5 + Testcontainers
-- **Frontend**: Vite dev server, TypeScript strict mode, hot module replacement
-- **Database**: PostgreSQL with Docker, Redis for caching and sessions
-- **API Documentation**: Springdoc OpenAPI 3, Swagger UI
-- **Development Workflow**: Docker Compose local stack, environment profiles
+### Backend Stack
+```yaml
+Framework: Spring Boot 3.4.5
+Language: Java 17
+Security: Spring Security 6.2.6
+Database: PostgreSQL 13+
+Cache: Redis 6+
+Build Tool: Maven 3.9+
+ORM: Spring Data JPA + Hibernate
+Migrations: Flyway
+Testing: JUnit 5, Mockito, TestContainers
+Documentation: OpenAPI 3 (Swagger)
+```
 
-## Technical Constraints
-- **Crypto Focus**: Ограничено мониторингом BTC, ETH, SOL (расширяемо)
-- **Exchange Support**: Только Bybit, Binance, OKX (без DEX интеграций)
-- **Authentication**: Только Telegram (без email/пароль fallback для MVP)
-- **UI Theme**: Обязательный dark theme с glassmorphism (без light mode)
-- **Real-time Limits**: WebSocket connection limits и API rate limiting
+### Frontend Stack
+```yaml
+Framework: React 18
+Language: TypeScript 5+
+UI Library: NextUI (Material Design)
+Build Tool: Vite 5+
+State Management: Context API + React Hooks
+HTTP Client: Axios
+Routing: React Router v6
+Styling: TailwindCSS + NextUI components
+Testing: Jest, React Testing Library
+```
 
-## Dependencies
-### Backend
-- **Spring Boot Starters**: web, data-jpa, security, validation, cache
-- **Database**: PostgreSQL driver, Flyway, Redis Jedis/Lettuce
-- **External APIs**: RestTemplate/WebClient для crypto APIs
-- **Testing**: JUnit 5, Mockito, Testcontainers, Spring Boot Test
+### Infrastructure & DevOps
+```yaml
+Containerization: Docker + Docker Compose
+Database: PostgreSQL (production), H2 (testing)
+Caching: Redis (session storage, API cache)
+Reverse Proxy: Nginx (production)
+Process Manager: PM2 (production)
+Monitoring: Spring Actuator + custom metrics
+```
 
-### Frontend  
-- **Core**: React 18, TypeScript 4.9+, React Router 6
-- **UI**: @nextui-org/react, @iconify/react, framer-motion
-- **Styling**: Tailwind CSS, NextUI theme system, PostCSS
-- **HTTP**: Axios с interceptors, error handling
-- **Build**: Vite, @vitejs/plugin-react
+## 🏗 Архитектурные паттерны
 
-## UI Migration Details
-### From Material-UI to NextUI (Completed)
-- **Reason**: Critical build issues with HeroUI/Material-UI conflicts (123+ TypeScript errors)
-- **Solution**: Complete migration to NextUI as modern successor to HeroUI
-- **Migration Scope**:
-  - Updated main.tsx: HeroUIProvider → NextUIProvider
-  - Updated tailwind.config.js: heroui → nextui plugin configuration
-  - Mass replaced @heroui/react → @nextui-org/react imports
-  - Rewrote UI components: Button.tsx, Card.tsx, Input.tsx, Modal.tsx
-  - Fixed props: variant="primary" → color="primary", leftstartContent → startContent
-- **Results**: 85% error reduction, successful builds, preserved design aesthetic
+### Backend Architecture (Layered + DDD)
+```
+┌─────────────────────────────────────┐
+│            Controllers              │ ← REST API Layer
+├─────────────────────────────────────┤
+│             Services                │ ← Business Logic
+├─────────────────────────────────────┤
+│            Repositories             │ ← Data Access Layer
+├─────────────────────────────────────┤
+│             Entities                │ ← Domain Models
+└─────────────────────────────────────┘
+```
 
-## Performance Considerations
-- **Caching Strategy**: Redis multi-level caching с TTL management
-- **API Optimization**: Rate limiting, request deduplication, error retry logic
-- **Frontend**: Code splitting, lazy loading, React.memo optimization, NextUI tree-shaking
-- **WebSocket**: Connection pooling, automatic reconnection, message buffering
-- **Build Optimization**: Vite optimizations, NextUI component chunking 
+### Key Design Patterns
+- **Repository Pattern** - для абстракции доступа к данным
+- **Service Layer Pattern** - для бизнес-логики
+- **DTO Pattern** - для transfer objects между слоями
+- **Factory Pattern** - для создания сложных объектов
+- **Observer Pattern** - для WebSocket уведомлений
+- **Strategy Pattern** - для различных типов аутентификации
+
+## 🔐 Security Implementation
+
+### Authentication & Authorization
+```java
+// Spring Security Configuration
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
+public class SecurityConfig {
+    // Session-based auth + CSRF protection
+    // Rate limiting per IP
+    // Role-based access control (@PreAuthorize)
+}
+```
+
+### Security Features
+- **CSRF Protection** - токен-based защита
+- **Rate Limiting** - защита от DoS атак
+- **Session Management** - secure session handling
+- **Password Encryption** - BCrypt with strength 12
+- **CORS Configuration** - ограниченные домены
+- **SQL Injection Protection** - JPA prepared statements
+
+## 📊 Database Design
+
+### Core Entities
+```sql
+-- Основные таблицы
+users              -- Пользователи системы
+roles              -- Роли (USER, ADMIN, PREMIUM)
+user_roles         -- Связь пользователей и ролей
+permissions        -- Детальные разрешения
+role_permissions   -- Связь ролей и разрешений
+
+-- Крипто данные
+coins              -- Информация о криптовалютах
+exchanges          -- Биржи
+coin_prices        -- Исторические цены
+tracked_coins      -- Отслеживаемые пользователем монеты
+price_alerts       -- Настройки алертов
+
+-- Система
+settings           -- Системные настройки
+audit_logs         -- Логи действий пользователей
+sessions           -- Активные сессии пользователей
+```
+
+### Database Constraints
+- **Foreign Keys** - обеспечение ссылочной целостности
+- **Unique Constraints** - предотвращение дублирования
+- **Check Constraints** - валидация данных на уровне БД
+- **Indexes** - оптимизация запросов
+
+## 🚀 Performance Optimizations
+
+### Caching Strategy
+```java
+// Redis Cache Configuration
+@Cacheable(value = "coinPrices", key = "#coinId")
+public CoinPrice getCoinPrice(String coinId) {
+    // Cache expensive API calls
+}
+
+@CacheEvict(value = "coinPrices", allEntries = true)
+@Scheduled(fixedRate = 60000) // Refresh every minute
+public void refreshPriceCache() {
+    // Periodic cache invalidation
+}
+```
+
+### Database Optimizations
+- **Connection Pooling** - HikariCP для эффективного использования соединений
+- **Query Optimization** - N+1 problem решается через @EntityGraph
+- **Pagination** - Spring Data Pageable для больших datasets
+- **Indexes** - на часто запрашиваемые поля
+
+## 🔄 Real-time Features
+
+### WebSocket Implementation
+```java
+@Controller
+public class PriceWebSocketController {
+    @MessageMapping("/subscribe/{coinId}")
+    @SendTo("/topic/prices/{coinId}")
+    public PriceUpdate subscribeToPriceUpdates(@DestinationVariable String coinId) {
+        // Real-time price broadcasting
+    }
+}
+```
+
+### Event-Driven Architecture
+- **ApplicationEvents** - для внутренней коммуникации
+- **@EventListener** - асинхронная обработка событий
+- **WebSocket** - для real-time updates в UI
+
+## 🧪 Testing Strategy
+
+### Backend Testing
+```java
+// Integration Tests
+@SpringBootTest
+@TestPropertySource(locations = "classpath:application-test.properties")
+class UserServiceIntegrationTest {
+    // Full context testing
+}
+
+// Unit Tests
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+    // Isolated component testing
+}
+```
+
+### Testing Levels
+- **Unit Tests** - изолированное тестирование компонентов
+- **Integration Tests** - тестирование взаимодействий
+- **Repository Tests** - @DataJpaTest для database layer
+- **Web Layer Tests** - @WebMvcTest для controllers
+- **Security Tests** - тестирование авторизации и аутентификации
+
+## 🔧 Development Tools & Workflow
+
+### Development Environment
+```bash
+# Required versions
+Java: 17+
+Maven: 3.9+
+Node.js: 18+
+PostgreSQL: 13+
+Redis: 6+
+Docker: 20+
+```
+
+### Code Quality Tools
+- **Checkstyle** - code formatting standards
+- **SpotBugs** - static analysis
+- **SonarQube** - code quality metrics
+- **ESLint + Prettier** - frontend code quality
+
+## 🌐 API Design
+
+### REST API Standards
+- **RESTful URLs** - resource-based naming
+- **HTTP Status Codes** - правильное использование
+- **Pagination** - для больших datasets
+- **Filtering** - query parameters для фильтрации
+- **Versioning** - через URL path (/api/v1/)
+
+### Response Format
+```json
+{
+  "data": {}, 
+  "success": true,
+  "message": "Operation completed successfully",
+  "errors": [],
+  "metadata": {
+    "timestamp": "2024-01-01T12:00:00Z",
+    "version": "1.0",
+    "pagination": {
+      "page": 1,
+      "size": 20,
+      "total": 100
+    }
+  }
+}
+```
+
+## 🔍 Monitoring & Observability
+
+### Application Monitoring
+- **Spring Actuator** - health checks, metrics
+- **Custom Metrics** - бизнес-метрики через Micrometer
+- **Logging** - структурированное логирование (JSON)
+- **Error Tracking** - централизованная обработка ошибок
+
+### Performance Monitoring
+- **Response Time** - отслеживание времени ответа API
+- **Database Performance** - мониторинг медленных запросов
+- **Cache Hit Ratio** - эффективность кэширования
+- **WebSocket Connections** - количество активных соединений 

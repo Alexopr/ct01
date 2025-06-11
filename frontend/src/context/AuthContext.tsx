@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   const fetchUser = async () => {
     try {
-      const response = await api.get('/auth/me');
+      const response = await api.get('/v1/auth/me');
       
       // Используем данные напрямую, так как backend уже возвращает правильную структуру
       const userData = response.data;
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const login = async (username: string, password: string) => {
     try {
       setError(null);
-      await api.post('/auth/login', { username, password });
+      await api.post('/v1/auth/login', { username, password });
       await fetchUser();
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
@@ -61,7 +61,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       setError(null);
       setLoading(true);
       
-      const response = await api.post('/auth/telegram', telegramData);
+      const response = await api.post('/v1/auth/telegram', telegramData);
       const authResponse = response.data;
       
       if (authResponse.user) {
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await api.post('/v1/auth/logout');
     } catch (err) {
       // Игнорируем ошибки logout
     } finally {

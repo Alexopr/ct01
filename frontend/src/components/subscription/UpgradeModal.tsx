@@ -10,11 +10,9 @@ import {
   CardBody,
   CardHeader,
   Chip,
-  Divider,
   RadioGroup,
   Radio,
-  Input,
-  Spinner
+  Input
 } from '@nextui-org/react';
 import { Icon } from '@iconify/react';
 import { subscriptionApi } from '../../services/api';

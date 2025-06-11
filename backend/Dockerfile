@@ -6,7 +6,7 @@ COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
 
-RUN ./mvnw install -DskipTests
+RUN ./mvnw clean compile package -DskipTests -Dmaven.test.skip=true
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
 FROM eclipse-temurin:17-jre-alpine

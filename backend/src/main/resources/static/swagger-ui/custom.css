@@ -1,0 +1,98 @@
+/* CT.01 Cryptocurrency Dashboard - Swagger UI Custom Styles */
+
+:root {
+    /* CT.01 Brand Colors - Dark Crypto Theme */
+    --ct01-dark-bg: #0a0b0d;
+    --ct01-card-bg: #161b22;
+    --ct01-border: #30363d;
+    --ct01-primary: #0ea5e9;
+    --ct01-primary-hover: #0284c7;
+    --ct01-success: #10b981;
+    --ct01-warning: #f59e0b;
+    --ct01-danger: #ef4444;
+    --ct01-text-primary: #f0f6fc;
+    --ct01-text-secondary: #8b949e;
+    --ct01-text-muted: #6e7681;
+    --ct01-accent: #a855f7;
+    --ct01-gradient: linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%);
+}
+
+/* Main Layout */
+.swagger-ui {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--ct01-dark-bg);
+    color: var(--ct01-text-primary);
+}
+
+/* Topbar Customization */
+.swagger-ui .topbar {
+    background: var(--ct01-card-bg);
+    border-bottom: 1px solid var(--ct01-border);
+    padding: 1rem 0;
+}
+
+.swagger-ui .topbar .download-url-wrapper {
+    display: none;
+}
+
+.swagger-ui .topbar .link::before {
+    content: "CT.01 - Cryptocurrency Trading Dashboard";
+    background: var(--ct01-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Info Section */
+.swagger-ui .info {
+    background: var(--ct01-card-bg);
+    border: 1px solid var(--ct01-border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.swagger-ui .info .title {
+    color: var(--ct01-text-primary);
+    font-size: 2.25rem;
+    font-weight: 700;
+    background: var(--ct01-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Operation Blocks */
+.swagger-ui .opblock {
+    background: var(--ct01-card-bg);
+    border: 1px solid var(--ct01-border);
+    border-radius: 8px;
+    margin: 1rem 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.swagger-ui .opblock.opblock-post {
+    border-left: 4px solid var(--ct01-success);
+}
+
+.swagger-ui .opblock.opblock-get {
+    border-left: 4px solid var(--ct01-primary);
+}
+
+/* Buttons */
+.swagger-ui .btn.execute {
+    background: var(--ct01-gradient);
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.swagger-ui .btn.execute:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+} 

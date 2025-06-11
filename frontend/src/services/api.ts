@@ -23,12 +23,11 @@ import type {
   SubscriptionPlan,
   SubscriptionStatusDto,
   UsageLimitDto,
-  SubscriptionUpgradeRequest,
-  SubscriptionFeatureMatrix
+  SubscriptionUpgradeRequest
 } from '../types/api';
 
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 class ApiService {
   private api: AxiosInstance;
@@ -51,7 +50,7 @@ class ApiService {
     this.api.interceptors.request.use(
       (config) => {
         // Add CSRF token if available
-        const csrfToken = this.getCsrfToken();
+        const csrfToken = this.getCsrfTokenFromCookie();
         if (csrfToken) {
           config.headers['X-CSRF-TOKEN'] = csrfToken;
         }
@@ -75,7 +74,7 @@ class ApiService {
     );
   }
 
-  private getCsrfToken(): string | null {
+  private getCsrfTokenFromCookie(): string | null {
     const cookies = document.cookie.split(';');
     for (const cookie of cookies) {
       const [name, value] = cookie.trim().split('=');
@@ -136,20 +135,24 @@ class ApiService {
   }
 
   // Authentication API
+  async getCsrfToken(): Promise<{ token: string; headerName: string }> {
+    return this.get<{ token: string; headerName: string }>('/v1/auth/csrf');
+  }
+
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    return this.post<AuthResponse>('/auth/login', credentials);
+    return this.post<AuthResponse>('/v1/auth/login', credentials);
   }
 
   async loginWithTelegram(telegramData: TelegramAuthRequest): Promise<AuthResponse> {
-    return this.post<AuthResponse>('/auth/telegram', telegramData);
+    return this.post<AuthResponse>('/v1/auth/telegram', telegramData);
   }
 
   async logout(): Promise<void> {
-    return this.post<void>('/auth/logout');
+    return this.post<void>('/v1/auth/logout');
   }
 
   async getCurrentUser(): Promise<User> {
-    return this.get<User>('/auth/me');
+    return this.get<User>('/v1/auth/me');
   }
 
   // User Management API
@@ -166,7 +169,7 @@ class ApiService {
   }
 
   async registerUser(userData: UserRegistrationData): Promise<User> {
-    return this.post<User>('/auth/register', userData);
+    return this.post<User>('/v1/auth/register', userData);
   }
 
   async updateUser(id: number, userData: Partial<UserFormData>): Promise<User> {
@@ -238,16 +241,18 @@ class ApiService {
     return this.delete<void>(`/v1/coins/${id}`);
   }
 
+  // Note: Backend has /api/v1/tracked-coins/* endpoints but frontend expectations differ
+  // Using the actual backend paths until alignment is decided
   async getTrackedCoins(): Promise<TrackedCoin[]> {
-    return this.get<TrackedCoin[]>('/v1/coins/tracked');
+    return this.get<TrackedCoin[]>('/v1/tracked-coins');
   }
 
-  async trackCoin(coinId: number, exchangeIds: number[]): Promise<TrackedCoin> {
-    return this.post<TrackedCoin>(`/v1/coins/${coinId}/track`, { exchangeIds });
+  async trackCoin(coinData: { symbol: string; exchange: string; isActive?: boolean }): Promise<TrackedCoin> {
+    return this.post<TrackedCoin>('/v1/tracked-coins', coinData);
   }
 
-  async untrackCoin(coinId: number): Promise<void> {
-    return this.delete<void>(`/v1/coins/${coinId}/track`);
+  async untrackCoin(id: number): Promise<void> {
+    return this.delete<void>(`/v1/tracked-coins/${id}`);
   }
 
   async getCoinStatistics(): Promise<CoinStatistics> {
@@ -275,8 +280,8 @@ class ApiService {
     return this.delete<void>(`/v1/exchanges/${id}`);
   }
 
-  async getExchangeStatus(): Promise<Record<string, any>> {
-    return this.get<Record<string, any>>('/v1/exchanges/status');
+  async getExchangeStatus(exchangeName: string): Promise<Record<string, any>> {
+    return this.get<Record<string, any>>(`/v1/exchanges/${exchangeName}/status`);
   }
 
   async testExchangeConnection(id: number): Promise<boolean> {
@@ -318,9 +323,7 @@ class ApiService {
     return this.get<SubscriptionStatusDto>('/v1/subscriptions/status');
   }
 
-  async getSubscriptionLimits(): Promise<UsageLimitDto[]> {
-    return this.get<UsageLimitDto[]>('/v1/subscriptions/limits');
-  }
+
 
   async upgradeSubscription(request: SubscriptionUpgradeRequest): Promise<SubscriptionStatusDto> {
     return this.post<SubscriptionStatusDto>('/v1/subscriptions/upgrade', request);
@@ -330,12 +333,43 @@ class ApiService {
     return this.post<SubscriptionStatusDto>('/v1/subscriptions/cancel');
   }
 
-  async checkResourceLimit(resourceType: string): Promise<boolean> {
-    return this.get<boolean>(`/v1/subscriptions/check-limit/${resourceType}`);
+  async checkResourceLimit(moduleName: string, resourceType: string, amount: number = 1): Promise<{ canUse: boolean; remaining: number }> {
+    return this.get<{ canUse: boolean; remaining: number }>(`/v1/subscriptions/check/${moduleName}/${resourceType}?amount=${amount}`);
   }
 
-  async getSubscriptionFeatureMatrix(): Promise<SubscriptionFeatureMatrix> {
-    return this.get<SubscriptionFeatureMatrix>('/v1/subscriptions/features');
+  async getSubscriptionLimits(moduleName?: string): Promise<UsageLimitDto[]> {
+    const url = moduleName ? `/v1/subscriptions/limits/${moduleName}` : '/v1/subscriptions/limits';
+    return this.get<UsageLimitDto[]>(url);
+  }
+
+  // Cryptocurrency API (Exchange Tracking System integration)
+  async getActiveCoins(): Promise<Coin[]> {
+    return this.get<Coin[]>('/v1/coins/active');
+  }
+
+  async getCoinPrice(symbol: string): Promise<any> {
+    return this.get<any>(`/v1/coins/${symbol}/price`);
+  }
+
+  async getCoinPriceOnExchange(symbol: string, exchange: string): Promise<any> {
+    return this.get<any>(`/v1/coins/${symbol}/price/${exchange}`);
+  }
+
+  async getCoinsByExchange(exchange: string): Promise<Coin[]> {
+    return this.get<Coin[]>(`/v1/coins/exchange/${exchange}`);
+  }
+
+  async getCoinStatsBySymbol(symbol: string, hours = 24): Promise<any> {
+    return this.get<any>(`/v1/coins/${symbol}/stats`, { hours });
+  }
+
+  // WebSocket stats
+  async getWebSocketStats(): Promise<any> {
+    return this.get<any>('/v1/websocket/stats');
+  }
+
+  async broadcastTestMessage(symbol: string): Promise<any> {
+    return this.post<any>(`/v1/websocket/broadcast-test?symbol=${symbol}`);
   }
 }
 
@@ -343,11 +377,10 @@ class ApiService {
 export const subscriptionApi = {
   getPlans: () => apiService.getSubscriptionPlans(),
   getStatus: () => apiService.getSubscriptionStatus(),
-  getLimits: () => apiService.getSubscriptionLimits(),
+  getLimits: (moduleName?: string) => apiService.getSubscriptionLimits(moduleName),
   upgrade: (request: SubscriptionUpgradeRequest) => apiService.upgradeSubscription(request),
   cancel: () => apiService.cancelSubscription(),
-  checkLimit: (resourceType: string) => apiService.checkResourceLimit(resourceType),
-  getFeatureMatrix: () => apiService.getSubscriptionFeatureMatrix()
+  checkLimit: (moduleName: string, resourceType: string, amount?: number) => apiService.checkResourceLimit(moduleName, resourceType, amount)
 };
 
 // Export singleton instance

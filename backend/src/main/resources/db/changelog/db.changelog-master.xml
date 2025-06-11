@@ -15,5 +15,7 @@
     <include file="db/changelog/006-create-tracked-coins-tables.xml"/>
     <include file="db/changelog/007-create-roles-and-permissions-tables.xml"/>
     <include file="db/changelog/008-create-subscription-tables.xml"/>
+    <include file="db/changelog/009-add-quote-currency-to-price-history.xml"/>
+    <include file="db/changelog/010-fix-users-table-schema.xml"/>
 
 </databaseChangeLog> 

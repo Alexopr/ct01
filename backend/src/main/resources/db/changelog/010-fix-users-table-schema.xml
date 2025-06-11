@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Fix users table schema to match JPA entity -->
+    <changeSet id="010-fix-users-table-schema" author="api-sync-fix">
+        <comment>Add missing columns to users table to match JPA entity</comment>
+        
+        <!-- Add missing full_name column -->
+        <addColumn tableName="users">
+            <column name="full_name" type="VARCHAR(100)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <!-- Rename password to password_hash to match JPA entity -->
+        <renameColumn tableName="users" 
+                      oldColumnName="password" 
+                      newColumnName="password_hash" 
+                      columnDataType="VARCHAR(255)"/>
+        
+        <!-- Add status column -->
+        <addColumn tableName="users">
+            <column name="status" type="VARCHAR(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        
+        <!-- Add last_login_at column -->
+        <addColumn tableName="users">
+            <column name="last_login_at" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <!-- Add index for status -->
+        <createIndex tableName="users" indexName="idx_user_status">
+            <column name="status"/>
+        </createIndex>
+        
+        <!-- Add index for telegram_id (rename existing) -->
+        <dropIndex tableName="users" indexName="idx_users_telegram_id"/>
+        <createIndex tableName="users" indexName="idx_user_telegram">
+            <column name="telegram_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog> 

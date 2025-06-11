@@ -1,0 +1,106 @@
+@startuml
+!theme plain
+title CT.01 - Package Dependencies Analysis
+
+package "alg.coyote001" {
+  package "controller" as ctrl {
+    [AuthController]
+    [CoinDataController] 
+    [ExchangeController]
+    [SubscriptionController]
+    [TrackedCoinController]
+    [WebSocketStatsController]
+  }
+  
+  package "service" as svc {
+    [UserService]
+    [CoinService]
+    [ExchangeService]
+    [SubscriptionService]
+    [PriceUpdateService]
+    [CacheService]
+    [TelegramAuthService]
+    
+    package "exchange" {
+      [AbstractExchangeAdapter]
+      [BinanceAdapter]
+      [BybitAdapter]
+      [OkxAdapter]
+    }
+  }
+  
+  package "repository" as repo {
+    [UserRepository]
+    [CoinRepository] 
+    [ExchangeRepository]
+    [SubscriptionRepository]
+    [PriceHistoryRepository]
+  }
+  
+  package "entity" as ent {
+    [User]
+    [Coin]
+    [Exchange]
+    [PriceHistory]
+    [UserSubscription]
+    [Role]
+    [Permission]
+  }
+  
+  package "dto" as dto {
+    [UserDto]
+    [CoinDto] 
+    [TickerData]
+    [SubscriptionDto]
+    [ExchangeDto]
+  }
+  
+  package "security" as sec {
+    [SecurityConfig]
+    [RateLimitFilter]
+    [CustomUserDetailsService]
+  }
+  
+  package "config" as cfg {
+    [Configuration Classes]
+  }
+  
+  package "exception" as exc {
+    [GlobalExceptionHandler]
+    [BusinessException]
+    [ResourceNotFoundException]
+  }
+}
+
+' Dependencies between packages
+ctrl --> svc : uses
+ctrl --> dto : uses
+ctrl --> exc : throws
+
+svc --> repo : uses
+svc --> ent : uses
+svc --> dto : converts
+svc --> exc : throws
+
+repo --> ent : manages
+
+sec --> svc : authenticates
+sec --> cfg : configures
+
+cfg --> ent : configures
+cfg --> repo : configures
+
+' Specific important dependencies
+[ExchangeService] --> [BinanceAdapter] : delegates
+[ExchangeService] --> [BybitAdapter] : delegates  
+[ExchangeService] --> [OkxAdapter] : delegates
+
+[BinanceAdapter] --> [AbstractExchangeAdapter] : extends
+[BybitAdapter] --> [AbstractExchangeAdapter] : extends
+[OkxAdapter] --> [AbstractExchangeAdapter] : extends
+
+note top of ctrl : "REST API Layer\n- No business logic\n- Only request/response handling"
+note top of svc : "Business Logic Layer\n- Core application logic\n- External integrations"
+note top of repo : "Data Access Layer\n- Database operations\n- Query optimization"
+
+@enduml 
